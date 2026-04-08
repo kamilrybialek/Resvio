@@ -1,13 +1,19 @@
-import { chromium } from 'playwright-extra';
-// @ts-ignore
-import stealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { Job } from '../../types';
-
-chromium.use(stealthPlugin());
 
 export class LinkedInScraper {
   static async scrape(query: string, location: string): Promise<Job[]> {
-    const browser = await chromium.launch({ headless: true });
+    if (process.env.VERCEL === '1') {
+      console.warn("LinkedIn scraper disabled on Vercel. Playwright requires a local environment.");
+      return [];
+    }
+
+    // @ts-ignore
+    const reqInstance = typeof window === 'undefined' ? eval('require') : null;
+    const playwright = reqInstance('playwright-extra');
+    const stealthPlugin = reqInstance('puppeteer-extra-plugin-stealth');
+    playwright.chromium.use(stealthPlugin());
+    
+    const browser = await playwright.chromium.launch({ headless: true });
     // Use the public search URL which does not require login for the first few results
     const url = `https://www.linkedin.com/jobs/search?keywords=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}`;
     

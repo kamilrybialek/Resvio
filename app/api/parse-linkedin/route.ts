@@ -1,18 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { chromium } from 'playwright-extra';
-// @ts-ignore
-import stealthPlugin from 'puppeteer-extra-plugin-stealth';
-
-chromium.use(stealthPlugin());
 
 export async function POST(req: NextRequest) {
   const { url } = await req.json();
+  
+  if (process.env.VERCEL === '1') {
+    return NextResponse.json({ 
+      text: "Vercel Execution Limited.\n\nPlaywright Stealth cannot run on Vercel serverless functions. Please run the application locally (npm run dev) to scrape LinkedIn.",
+      status: "partial"
+    });
+  }
   
   if (!url || !url.includes('linkedin.com/in/')) {
     return NextResponse.json({ error: 'Valid LinkedIn profile URL required' }, { status: 400 });
   }
 
-  const browser = await chromium.launch({ headless: true });
+  // @ts-ignore
+  const reqInstance = typeof window === 'undefined' ? eval('require') : null;
+  const playwright = reqInstance('playwright-extra');
+  const stealthPlugin = reqInstance('puppeteer-extra-plugin-stealth');
+  playwright.chromium.use(stealthPlugin());
+
+  const browser = await playwright.chromium.launch({ headless: true });
   try {
     const context = await browser.newContext({
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { chromium } from 'playwright';
 import { ProfileService } from '@/lib/services/profile-service';
 
 export async function POST(req: NextRequest) {
@@ -15,8 +14,18 @@ export async function POST(req: NextRequest) {
     ProfileService.markJobApplied(jobId);
   }
 
+  if (process.env.VERCEL === '1') {
+    return NextResponse.json({ 
+      error: "Vercel Execution Limited.\n\nPlaywright cannot spin up browsers on Vercel. Run the application locally for semi-automated applying." 
+    }, { status: 400 });
+  }
+
+  // @ts-ignore
+  const reqInstance = typeof window === 'undefined' ? eval('require') : null;
+  const playwright = reqInstance('playwright');
+
   // We run this locally, so we can use headless: false to let the user see and finish the application
-  const browser = await chromium.launch({ headless: false });
+  const browser = await playwright.chromium.launch({ headless: false });
   const context = await browser.newContext();
   const page = await context.newPage();
 

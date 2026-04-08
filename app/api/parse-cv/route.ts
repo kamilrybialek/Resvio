@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-const pdfParse = require('pdf-parse');
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,7 +12,13 @@ export async function POST(req: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     
+    // @ts-ignore
+    const reqInstance = typeof window === 'undefined' ? eval('require') : null;
+    if (!reqInstance) throw new Error("Backend only limit");
+    const pdfParse = reqInstance('pdf-parse');
+    
     const data = await pdfParse(buffer);
+
     
     return NextResponse.json({ text: data.text });
   } catch (error) {

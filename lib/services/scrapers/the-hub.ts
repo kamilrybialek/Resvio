@@ -1,9 +1,16 @@
-import { chromium } from 'playwright';
 import { Job } from '../../types';
 
 export class TheHubScraper {
   static async scrape(query: string = 'Graphic Designer', location: string = 'Sweden'): Promise<Job[]> {
-    const browser = await chromium.launch({ headless: true });
+    if (process.env.VERCEL === '1') {
+      console.warn("The Hub scraper disabled on Vercel.");
+      return [];
+    }
+
+    // @ts-ignore
+    const reqInstance = typeof window === 'undefined' ? eval('require') : null;
+    const playwright = reqInstance('playwright');
+    const browser = await playwright.chromium.launch({ headless: true });
     const page = await browser.newPage();
     
     // Construct search URL (example format for The Hub)

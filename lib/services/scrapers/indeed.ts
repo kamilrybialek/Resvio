@@ -1,13 +1,19 @@
-import { chromium } from 'playwright-extra';
-// @ts-ignore
-import stealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { Job } from '../../types';
-
-chromium.use(stealthPlugin());
 
 export class IndeedScraper {
   static async scrape(query: string, location: string): Promise<Job[]> {
-    const browser = await chromium.launch({ headless: true });
+    if (process.env.VERCEL === '1') {
+      console.warn("Indeed scraper disabled on Vercel.");
+      return [];
+    }
+
+    // @ts-ignore
+    const reqInstance = typeof window === 'undefined' ? eval('require') : null;
+    const playwright = reqInstance('playwright-extra');
+    const stealthPlugin = reqInstance('puppeteer-extra-plugin-stealth');
+    playwright.chromium.use(stealthPlugin());
+    
+    const browser = await playwright.chromium.launch({ headless: true });
     
     // Determine country code based on location for Indeed (rough approximation)
     const normalizedLoc = location.toLowerCase();
