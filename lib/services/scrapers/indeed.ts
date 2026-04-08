@@ -28,6 +28,14 @@ export class IndeedScraper {
         url += `&fromage=${fromageMap[dateFilter]}`;
       }
     }
+
+    // @ts-ignore
+    const reqInstance = typeof window === 'undefined' ? eval('require') : null;
+    const playwright = reqInstance('playwright-extra');
+    const stealthPlugin = reqInstance('puppeteer-extra-plugin-stealth');
+    playwright.chromium.use(stealthPlugin());
+    
+    const browser = await playwright.chromium.launch({ headless: true });
     
     try {
       const context = await browser.newContext({
