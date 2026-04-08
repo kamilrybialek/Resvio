@@ -20,6 +20,7 @@ export interface UserProfile {
   email: string;
   phone: string;
   baseCvPath: string; // Markdown or PDF
+  baseCv?: string; // The raw text
   portfolioUrl?: string;
   skills: string[];
   appliedJobs?: string[]; // IDs of applied jobs
