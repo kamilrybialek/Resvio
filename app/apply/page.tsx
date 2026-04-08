@@ -539,6 +539,8 @@ export default function ApplyPage() {
                 Ready to Apply at {job.company} ↗
               </a>
               <p style={{ color: 'var(--slater)', fontSize: '0.85rem' }}>Source: {job.source} · {new Date().toLocaleDateString()}</p>
+            </div>
+          )}
         </div>
       </div>
 
