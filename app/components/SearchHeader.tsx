@@ -3,17 +3,18 @@
 import React, { useState } from 'react';
 
 interface SearchHeaderProps {
-  onSearch: (q: string, l: string) => void;
+  onSearch: (q: string, l: string, d: string) => void;
 }
 
 export default function SearchHeader({ onSearch }: SearchHeaderProps) {
   const [query, setQuery] = useState('');
   const [location, setLocation] = useState('');
+  const [dateFilter, setDateFilter] = useState('any');
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query && !location) return;
-    onSearch(query, location);
+    onSearch(query, location, dateFilter);
   };
 
   return (
@@ -26,54 +27,66 @@ export default function SearchHeader({ onSearch }: SearchHeaderProps) {
     }}>
       <h2 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.2rem' }}>Search opportunities</h2>
 
-      <form onSubmit={handleSearch} style={{ display: 'flex', gap: '1rem', width: '100%' }}>
-        <div style={{ flex: 2 }}>
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Job title (e.g. Graphic Designer, UI/UX)..."
-            style={{
-              width: '100%',
-              padding: '0.75rem 1rem',
-              borderRadius: '10px',
-              border: '1px solid var(--glass-border)',
-              background: 'rgba(0,0,0,0.2)',
-              color: 'var(--snow)',
-              fontSize: '0.95rem',
-            }}
-          />
-        </div>
+      <form onSubmit={handleSearch} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr auto', gap: '0.75rem', width: '100%' }}>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Job title (e.g. Graphic Designer)..."
+          style={{
+            padding: '0.75rem 1rem',
+            borderRadius: '10px',
+            border: '1px solid var(--glass-border)',
+            background: 'rgba(0,0,0,0.2)',
+            color: 'var(--snow)',
+            fontSize: '0.9rem',
+          }}
+        />
 
-        <div style={{ flex: 1 }}>
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="Location (e.g. Sweden, Stockholm, Remote)..."
-            style={{
-              width: '100%',
-              padding: '0.75rem 1rem',
-              borderRadius: '10px',
-              border: '1px solid var(--glass-border)',
-              background: 'rgba(0,0,0,0.2)',
-              color: 'var(--snow)',
-              fontSize: '0.95rem',
-            }}
-          />
-        </div>
+        <input
+          type="text"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          placeholder="Location (e.g. Sweden)..."
+          style={{
+            padding: '0.75rem 1rem',
+            borderRadius: '10px',
+            border: '1px solid var(--glass-border)',
+            background: 'rgba(0,0,0,0.2)',
+            color: 'var(--snow)',
+            fontSize: '0.9rem',
+          }}
+        />
+
+        <select
+          value={dateFilter}
+          onChange={(e) => setDateFilter(e.target.value)}
+          style={{
+            padding: '0.75rem 1rem',
+            borderRadius: '10px',
+            border: '1px solid var(--glass-border)',
+            background: 'rgba(0,0,0,0.2)',
+            color: 'var(--snow)',
+            fontSize: '0.9rem',
+            cursor: 'pointer'
+          }}
+        >
+          <option value="any">Anytime</option>
+          <option value="24h">Last 24 hours</option>
+          <option value="7d">Last 7 days</option>
+          <option value="30d">Last 30 days</option>
+        </select>
 
         <button
           type="submit"
           style={{
-            padding: '0.75rem 2rem',
+            padding: '0.75rem 1.5rem',
             background: 'linear-gradient(135deg, var(--nordic-blue), var(--nordic-teal))',
             color: 'white',
             borderRadius: '10px',
             fontWeight: '700',
             border: 'none',
             cursor: 'pointer',
-            whiteSpace: 'nowrap',
           }}
         >
           Search

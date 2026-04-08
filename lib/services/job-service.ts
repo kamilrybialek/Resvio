@@ -9,14 +9,14 @@ export class JobService {
    * Fetches jobs from multiple Scandinavian sources.
    * Aggregates results from JobTech (official), The Hub (startups), LinkedIn, and Indeed.
    */
-  static async fetchAllJobs(location: string = 'Stockholm', query: string = 'Graphic Designer'): Promise<Job[]> {
+  static async fetchAllJobs(location: string = 'Stockholm', query: string = 'Graphic Designer', page: number = 1, dateFilter: string = 'any'): Promise<Job[]> {
     try {
       // Run searchers in parallel and catch any failing ones so others still execute
       const [jobTechJobs, theHubJobs, linkedinJobs, indeedJobs] = await Promise.all([
-        JobTechService.search(query, location).catch(() => []),
-        TheHubScraper.scrape(query, location).catch(() => []),
-        LinkedInScraper.scrape(query, location).catch(() => []),
-        IndeedScraper.scrape(query, location).catch(() => [])
+        JobTechService.search(query, location, page, dateFilter).catch(() => []),
+        TheHubScraper.scrape(query, location, page, dateFilter).catch(() => []),
+        LinkedInScraper.scrape(query, location, page, dateFilter).catch(() => []),
+        IndeedScraper.scrape(query, location, page, dateFilter).catch(() => [])
       ]);
 
       // Combine and sort by date or match score

@@ -1,20 +1,19 @@
 import { Job } from '../../types';
 
 export class TheHubScraper {
-  static async scrape(query: string = 'Graphic Designer', location: string = 'Sweden'): Promise<Job[]> {
+  static async scrape(query: string = 'Graphic Designer', location: string = 'Sweden', page: number = 1, dateFilter: string = ''): Promise<Job[]> {
     if (process.env.VERCEL === '1') {
       console.warn("The Hub scraper disabled on Vercel.");
       return [];
     }
 
-    // @ts-ignore
-    const reqInstance = typeof window === 'undefined' ? eval('require') : null;
-    const playwright = reqInstance('playwright');
-    const browser = await playwright.chromium.launch({ headless: true });
-    const page = await browser.newPage();
-    
     // Construct search URL (example format for The Hub)
-    const url = `https://thehub.io/jobs?search=${encodeURIComponent(query)}&countryCode=${location === 'Sweden' ? 'SE' : 'DK'}`;
+    // Note: The Hub might not support direct page/date params in the URL easily without more research, 
+    // but we pass them for consistency.
+    let url = `https://thehub.io/jobs?search=${encodeURIComponent(query)}&countryCode=${location === 'Sweden' ? 'SE' : 'DK'}`;
+    if (page > 1) {
+      url += `&page=${page}`;
+    }
     
     try {
       await page.goto(url, { waitUntil: 'load', timeout: 15000 });

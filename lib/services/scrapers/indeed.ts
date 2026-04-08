@@ -1,27 +1,33 @@
 import { Job } from '../../types';
 
 export class IndeedScraper {
-  static async scrape(query: string, location: string): Promise<Job[]> {
+  static async scrape(query: string, location: string, page: number = 1, dateFilter: string = ''): Promise<Job[]> {
     if (process.env.VERCEL === '1') {
       console.warn("Indeed scraper disabled on Vercel.");
       return [];
     }
 
-    // @ts-ignore
-    const reqInstance = typeof window === 'undefined' ? eval('require') : null;
-    const playwright = reqInstance('playwright-extra');
-    const stealthPlugin = reqInstance('puppeteer-extra-plugin-stealth');
-    playwright.chromium.use(stealthPlugin());
+    const limit = 10;
+    const start = (page - 1) * limit;
     
-    const browser = await playwright.chromium.launch({ headless: true });
-    
-    // Use se.indeed.com for Sweden-related searches, fallback to se for nordic
+    // Normalize location for TLD selection
     const normalizedLoc = location.toLowerCase();
     const isDenmark = normalizedLoc.includes('denmark') || normalizedLoc.includes('copenhagen') || normalizedLoc === 'dk';
     const isNorway = normalizedLoc.includes('norway') || normalizedLoc.includes('oslo') || normalizedLoc === 'no';
     const tld = isDenmark ? 'dk' : isNorway ? 'no' : 'se'; // default to Sweden
 
-    const url = `https://${tld}.indeed.com/jobs?q=${encodeURIComponent(query)}&l=${encodeURIComponent(location)}`;
+    let url = `https://${tld}.indeed.com/jobs?q=${encodeURIComponent(query)}&l=${encodeURIComponent(location)}&start=${start}`;
+    
+    if (dateFilter && dateFilter !== 'any') {
+      const fromageMap: Record<string, string> = {
+        '24h': '1',
+        '7d': '7',
+        '30d': '30'
+      };
+      if (fromageMap[dateFilter]) {
+        url += `&fromage=${fromageMap[dateFilter]}`;
+      }
+    }
     
     try {
       const context = await browser.newContext({

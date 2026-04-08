@@ -4,15 +4,28 @@ import axios from 'axios';
 export class JobTechService {
   private static API_URL = 'https://jobsearch.api.jobtechdev.se/search';
 
-  static async search(query: string = 'Grafisk formgivare', location: string = 'Stockholm'): Promise<Job[]> {
+  static async search(query: string = 'Grafisk formgivare', location: string = 'Stockholm', page: number = 1, dateFilter: string = ''): Promise<Job[]> {
     try {
-      const response = await axios.get(this.API_URL, {
-        params: {
-          q: query,
-          l: location,
-          limit: 10
-        }
-      });
+      const limit = 20;
+      const offset = (page - 1) * limit;
+      
+      const params: any = {
+        q: query,
+        l: location,
+        limit: limit,
+        offset: offset
+      };
+
+      if (dateFilter && dateFilter !== 'any') {
+        const now = new Date();
+        if (dateFilter === '24h') now.setDate(now.getDate() - 1);
+        else if (dateFilter === '7d') now.setDate(now.getDate() - 7);
+        else if (dateFilter === '30d') now.setDate(now.getDate() - 30);
+        
+        params['published-after'] = now.toISOString().split('.')[0]; // Format: YYYY-MM-DDTHH:MM:SS
+      }
+
+      const response = await axios.get(this.API_URL, { params });
 
       const ads = response.data.hits || [];
       

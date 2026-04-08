@@ -1,21 +1,27 @@
 import { Job } from '../../types';
 
 export class LinkedInScraper {
-  static async scrape(query: string, location: string): Promise<Job[]> {
+  static async scrape(query: string, location: string, page: number = 1, dateFilter: string = ''): Promise<Job[]> {
     if (process.env.VERCEL === '1') {
       console.warn("LinkedIn scraper disabled on Vercel. Playwright requires a local environment.");
       return [];
     }
 
-    // @ts-ignore
-    const reqInstance = typeof window === 'undefined' ? eval('require') : null;
-    const playwright = reqInstance('playwright-extra');
-    const stealthPlugin = reqInstance('puppeteer-extra-plugin-stealth');
-    playwright.chromium.use(stealthPlugin());
+    const limit = 25;
+    const start = (page - 1) * limit;
     
-    const browser = await playwright.chromium.launch({ headless: true });
-    // Use the public search URL which does not require login for the first few results
-    const url = `https://www.linkedin.com/jobs/search?keywords=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}`;
+    let url = `https://www.linkedin.com/jobs/search?keywords=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}&start=${start}`;
+    
+    if (dateFilter && dateFilter !== 'any') {
+      const tprMap: Record<string, string> = {
+        '24h': 'r86400',
+        '7d': 'r604800',
+        '30d': 'r2592000'
+      };
+      if (tprMap[dateFilter]) {
+        url += `&f_TPR=${tprMap[dateFilter]}`;
+      }
+    }
     
     try {
       const context = await browser.newContext({
