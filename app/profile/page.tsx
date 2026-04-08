@@ -120,15 +120,23 @@ export default function ProfilePage() {
                         const res = await fetch('/api/parse-cv', { method: 'POST', body: formData });
                         const data = await res.json();
                         if (data.text) {
-                          setProfile({ ...profile, baseCv: data.text });
+                          const updated = { ...profile, baseCv: data.text };
+                          setProfile(updated);
+                          // Auto-save immediately after import
+                          await fetch('/api/profile', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(updated)
+                          });
+                          alert('✅ CV imported and saved! You can review and edit it below.');
                         } else {
-                          alert(data.error || 'Failed to parse PDF');
+                          alert('Error: ' + (data.error || 'Failed to parse PDF'));
                         }
                       } catch (err) {
                         alert('Error uploading PDF');
                       } finally {
                         setIsSaving(false);
-                        e.target.value = ''; // reset input
+                        e.target.value = '';
                       }
                     }} />
                     <label htmlFor="cv-upload" style={{ 

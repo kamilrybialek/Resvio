@@ -15,11 +15,12 @@ export class IndeedScraper {
     
     const browser = await playwright.chromium.launch({ headless: true });
     
-    // Determine country code based on location for Indeed (rough approximation)
+    // Use se.indeed.com for Sweden-related searches, fallback to se for nordic
     const normalizedLoc = location.toLowerCase();
-    const isSweden = normalizedLoc.includes('stockholm') || normalizedLoc.includes('gothenburg') || normalizedLoc.includes('malmo');
-    const tld = isSweden ? 'se' : 'com';
-    
+    const isDenmark = normalizedLoc.includes('denmark') || normalizedLoc.includes('copenhagen') || normalizedLoc === 'dk';
+    const isNorway = normalizedLoc.includes('norway') || normalizedLoc.includes('oslo') || normalizedLoc === 'no';
+    const tld = isDenmark ? 'dk' : isNorway ? 'no' : 'se'; // default to Sweden
+
     const url = `https://${tld}.indeed.com/jobs?q=${encodeURIComponent(query)}&l=${encodeURIComponent(location)}`;
     
     try {
