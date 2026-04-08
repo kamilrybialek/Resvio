@@ -3,5 +3,13 @@
   "email": "kamil@example.se",
   "phone": "+46 70 000 00 00",
   "baseCvPath": "data/cvs/base_cv.md",
-  "skills": ["Graphic Design", "Figma", "Adobe CC", "Swedish Design"]
+  "skills": [
+    "Graphic Design",
+    "Figma",
+    "Adobe CC",
+    "Swedish Design"
+  ],
+  "appliedJobs": [
+    "af-30776857"
+  ]
 }
