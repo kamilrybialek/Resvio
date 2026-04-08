@@ -1,14 +1,14 @@
 import { Job } from '../../types';
 
 export class IndeedScraper {
-  static async scrape(query: string, location: string, page: number = 1, dateFilter: string = ''): Promise<Job[]> {
+  static async scrape(query: string, location: string, pageNumber: number = 1, dateFilter: string = ''): Promise<Job[]> {
     if (process.env.VERCEL === '1') {
       console.warn("Indeed scraper disabled on Vercel.");
       return [];
     }
 
     const limit = 10;
-    const start = (page - 1) * limit;
+    const start = (pageNumber - 1) * limit;
     
     // Normalize location for TLD selection
     const normalizedLoc = location.toLowerCase();

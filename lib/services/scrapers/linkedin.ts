@@ -1,14 +1,14 @@
 import { Job } from '../../types';
 
 export class LinkedInScraper {
-  static async scrape(query: string, location: string, page: number = 1, dateFilter: string = ''): Promise<Job[]> {
+  static async scrape(query: string, location: string, pageNumber: number = 1, dateFilter: string = ''): Promise<Job[]> {
     if (process.env.VERCEL === '1') {
       console.warn("LinkedIn scraper disabled on Vercel. Playwright requires a local environment.");
       return [];
     }
 
     const limit = 25;
-    const start = (page - 1) * limit;
+    const start = (pageNumber - 1) * limit;
     
     let url = `https://www.linkedin.com/jobs/search?keywords=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}&start=${start}`;
     

@@ -1,19 +1,23 @@
 import { Job } from '../../types';
 
 export class TheHubScraper {
-  static async scrape(query: string = 'Graphic Designer', location: string = 'Sweden', page: number = 1, dateFilter: string = ''): Promise<Job[]> {
+  static async scrape(query: string = 'Graphic Designer', location: string = 'Sweden', pageNumber: number = 1, dateFilter: string = ''): Promise<Job[]> {
     if (process.env.VERCEL === '1') {
       console.warn("The Hub scraper disabled on Vercel.");
       return [];
     }
 
-    // Construct search URL (example format for The Hub)
-    // Note: The Hub might not support direct page/date params in the URL easily without more research, 
-    // but we pass them for consistency.
+    // Construct search URL
     let url = `https://thehub.io/jobs?search=${encodeURIComponent(query)}&countryCode=${location === 'Sweden' ? 'SE' : 'DK'}`;
-    if (page > 1) {
-      url += `&page=${page}`;
+    if (pageNumber > 1) {
+      url += `&page=${pageNumber}`;
     }
+
+    // @ts-ignore
+    const reqInstance = typeof window === 'undefined' ? eval('require') : null;
+    const playwright = reqInstance('playwright');
+    const browser = await playwright.chromium.launch({ headless: true });
+    const page = await browser.newPage();
     
     try {
       await page.goto(url, { waitUntil: 'load', timeout: 15000 });
