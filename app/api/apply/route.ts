@@ -16,8 +16,10 @@ export async function POST(req: NextRequest) {
 
   if (process.env.VERCEL === '1') {
     return NextResponse.json({ 
-      error: "Vercel Execution Limited.\n\nPlaywright cannot spin up browsers on Vercel. Run the application locally for semi-automated applying." 
-    }, { status: 400 });
+      action: 'redirect',
+      url: jobUrl,
+      message: "Moved to job posting. Automatic form filling is disabled on the Vercel cloud environment." 
+    });
   }
 
   // @ts-ignore

@@ -31,10 +31,17 @@ export default function JobActions({ job }: JobActionsProps) {
         })
       });
       const data = await response.json();
-      if (data.error) alert(data.error);
-      else alert(data.message);
+      if (data.error) {
+        alert(data.error);
+      } else if (data.action === 'redirect') {
+        window.open(data.url, '_blank');
+        // Small delay to allow the user to see the alert or state change
+        // State updates could also go here
+      } else {
+        alert(data.message);
+      }
     } catch (e) {
-      alert('Error starting automation.');
+      alert('Error starting application process.');
     }
   };
 
