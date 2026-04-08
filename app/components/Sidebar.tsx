@@ -7,47 +7,41 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="glass" style={{ 
-      width: '280px', 
-      height: 'calc(100vh - 40px)', 
+    <div className="glass" style={{
+      width: '240px',
+      height: 'calc(100vh - 40px)',
       margin: '20px',
-      padding: '2rem',
+      padding: '1.5rem 1.25rem',
       display: 'flex',
       flexDirection: 'column',
-      gap: '2rem',
-      position: 'fixed'
+      gap: '1.5rem',
+      position: 'fixed',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-        <div style={{ 
-          width: '32px', 
-          height: '32px', 
-          background: 'var(--nordic-blue)', 
-          borderRadius: '8px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontWeight: 'bold',
-          color: 'white'
+      {/* Logo */}
+      <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', textDecoration: 'none' }}>
+        <div style={{
+          width: '30px', height: '30px',
+          background: 'linear-gradient(135deg, var(--nordic-blue), var(--nordic-teal))',
+          borderRadius: '8px', display: 'flex', alignItems: 'center',
+          justifyContent: 'center', fontWeight: '800', color: 'white', fontSize: '0.9rem',
         }}>A</div>
-        <Link href="/">
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '800', letterSpacing: '-0.5px', color: 'var(--snow)' }}>
-            Apply<span className="premium-gradient">arr</span>
-          </h1>
-        </Link>
-      </div>
+        <h1 style={{ fontSize: '1.3rem', fontWeight: '800', letterSpacing: '-0.5px', color: 'var(--snow)', margin: 0 }}>
+          Apply<span className="premium-gradient">arr</span>
+        </h1>
+      </Link>
 
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        <NavItem href="/" icon="🏠" label="Dashboard" active={pathname === '/'} />
-        <NavItem href="/?q=UI+Designer" icon="🔍" label="Job Search" />
+      {/* Nav */}
+      <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        <NavItem href="/" icon="🔍" label="Job Search" active={pathname === '/'} />
         <NavItem href="/profile" icon="👤" label="Profile & CV" active={pathname === '/profile'} />
-        <NavItem href="/settings" icon="⚙️" label="Settings" />
       </nav>
 
-      <div style={{ marginTop: 'auto', padding: '1rem', background: 'var(--glass-border)', borderRadius: '12px' }}>
-        <p style={{ fontSize: '0.8rem', color: 'var(--glacier)', marginBottom: '0.5rem' }}>Active Market</p>
+      {/* Bottom status */}
+      <div style={{ marginTop: 'auto', padding: '0.85rem 1rem', background: 'rgba(255,255,255,0.04)', borderRadius: '10px', border: '1px solid var(--glass-border)' }}>
+        <p style={{ fontSize: '0.72rem', color: 'var(--slater)', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Target Market</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span>🇸🇪</span>
-          <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>Scandinavia</span>
+          <span style={{ fontWeight: '600', fontSize: '0.85rem' }}>Scandinavia</span>
         </div>
       </div>
     </div>
@@ -56,19 +50,20 @@ export default function Sidebar() {
 
 function NavItem({ href, icon, label, active = false }: { href: string; icon: string; label: string; active?: boolean }) {
   return (
-    <Link href={href} className="card-hover" style={{ 
-      display: 'flex', 
-      alignItems: 'center', 
-      gap: '1rem', 
-      padding: '0.75rem 1rem', 
-      borderRadius: '12px',
-      background: active ? 'var(--nordic-blue)' : 'transparent',
+    <Link href={href} style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.75rem',
+      padding: '0.65rem 0.85rem',
+      borderRadius: '10px',
+      background: active ? 'linear-gradient(135deg, var(--nordic-blue), var(--nordic-teal))' : 'transparent',
       color: active ? 'white' : 'var(--mist)',
-      cursor: 'pointer',
       fontWeight: active ? '600' : '400',
-      transition: 'all 0.2s'
+      fontSize: '0.9rem',
+      textDecoration: 'none',
+      transition: 'background 0.15s, color 0.15s',
     }}>
-      <span>{icon}</span>
+      <span style={{ fontSize: '1rem' }}>{icon}</span>
       <span>{label}</span>
     </Link>
   );
