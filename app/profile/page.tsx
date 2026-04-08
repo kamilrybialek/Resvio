@@ -5,8 +5,8 @@ import Sidebar from '../components/Sidebar';
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState({
-    name: 'Kamil Kowalski',
-    email: 'kamil@example.se',
+    name: '',
+    email: '',
     phone: '',
     baseCv: '',
     portfolio: ''
@@ -14,13 +14,34 @@ export default function ProfilePage() {
 
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleSave = () => {
+  useEffect(() => {
+    fetch('/api/profile').then(res => res.json()).then(data => {
+      if (data && data.name) {
+        setProfile({
+          name: data.name || '',
+          email: data.email || '',
+          phone: data.phone || '',
+          baseCv: data.baseCv || data.baseCvPath || '',
+          portfolio: data.portfolioUrl || ''
+        });
+      }
+    });
+  }, []);
+
+  const handleSave = async () => {
     setIsSaving(true);
-    // Simulate save
-    setTimeout(() => {
-      setIsSaving(false);
+    try {
+      await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profile)
+      });
       alert('Profile updated successfully!');
-    }, 1000);
+    } catch (e) {
+      alert('Failed to save profile');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (

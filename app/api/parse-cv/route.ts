@@ -15,7 +15,8 @@ export async function POST(req: NextRequest) {
     // @ts-ignore
     const reqInstance = typeof window === 'undefined' ? eval('require') : null;
     if (!reqInstance) throw new Error("Backend only limit");
-    const pdfParse = reqInstance('pdf-parse');
+    const pdfParseModule = reqInstance('pdf-parse');
+    const pdfParse = pdfParseModule.default || pdfParseModule;
     
     const data = await pdfParse(buffer);
 

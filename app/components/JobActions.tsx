@@ -13,11 +13,25 @@ export default function JobActions({ job }: JobActionsProps) {
 
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
-    // Simulate AI call
-    setTimeout(() => {
-      setAnalysis("This job is a strong match (92%). Emphasize your Swedish design aesthetics and Figma workflow.");
+    setAnalysis(null);
+    try {
+      const response = await fetch('/api/analyze-job', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ job })
+      });
+      const data = await response.json();
+      
+      if (data.error) {
+        setAnalysis("Failed to analyze job match: " + data.error);
+      } else {
+        setAnalysis(`Match Score: ${data.score}% - ${data.reasoning} Tip: ${data.tailoringTips}`);
+      }
+    } catch (e) {
+      setAnalysis("Error communicating with AI service.");
+    } finally {
       setIsAnalyzing(false);
-    }, 1500);
+    }
   };
 
   const handleApply = async () => {
