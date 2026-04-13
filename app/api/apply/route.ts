@@ -2,14 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ProfileService } from '@/lib/services/profile-service';
 
 export async function POST(req: NextRequest) {
-  const { jobUrl, tailoredCvPath, jobId } = await req.json();
+  const { jobUrl, tailoredCvPath, jobId, toggle, currentlyApplied } = await req.json();
   const profile = ProfileService.getProfile();
 
   if (!profile) {
     return NextResponse.json({ error: 'Profile not found. Please setup your profile first.' }, { status: 400 });
   }
 
-  // Mark as applied quickly so the UI can update while the slow browser process runs
+  // Toggle mode: just mark/unmark and return
+  if (toggle && jobId) {
+    const newState = ProfileService.toggleJobApplied(jobId);
+    return NextResponse.json({ applied: newState });
+  }
+
+  // Standard apply: mark as applied
   if (jobId) {
     ProfileService.markJobApplied(jobId);
   }

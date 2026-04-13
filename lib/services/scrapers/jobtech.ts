@@ -18,11 +18,16 @@ export class JobTechService {
 
       if (dateFilter && dateFilter !== 'any') {
         const now = new Date();
-        if (dateFilter === '24h') now.setDate(now.getDate() - 1);
-        else if (dateFilter === '7d') now.setDate(now.getDate() - 7);
-        else if (dateFilter === '30d') now.setDate(now.getDate() - 30);
-        
-        params['published-after'] = now.toISOString().split('.')[0]; // Format: YYYY-MM-DDTHH:MM:SS
+        const hoursMap: Record<string, number> = {
+          '1h': 1, '2h': 2, '4h': 4, '12h': 12,
+          '24h': 24, '48h': 48, '72h': 72,
+          '7d': 168, '14d': 336, '30d': 720,
+        };
+        const hours = hoursMap[dateFilter];
+        if (hours) {
+          now.setHours(now.getHours() - hours);
+          params['published-after'] = now.toISOString().split('.')[0];
+        }
       }
 
       const response = await axios.get(this.API_URL, { params });

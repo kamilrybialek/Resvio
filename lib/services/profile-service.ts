@@ -32,6 +32,18 @@ export class ProfileService {
     }
   }
 
+  static toggleJobApplied(jobId: string): boolean {
+    const profile = this.getProfile();
+    if (!profile) return false;
+    const applied = profile.appliedJobs || [];
+    const isApplied = applied.includes(jobId);
+    profile.appliedJobs = isApplied
+      ? applied.filter(id => id !== jobId)
+      : [...applied, jobId];
+    this.saveProfile(profile);
+    return !isApplied; // returns new applied state
+  }
+
   static clearDatabase(): void {
     if (fs.existsSync(this.PROFILE_PATH)) {
       fs.unlinkSync(this.PROFILE_PATH);

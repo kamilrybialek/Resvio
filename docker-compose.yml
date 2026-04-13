@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  applyarr:
+    build: .
+    container_name: applyarr
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      # Provide at least one AI key.  The app checks for both at runtime.
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      # Do NOT set VERCEL=1 here — that would disable Playwright scrapers.
+    volumes:
+      # Persist the profile database (data/profile.json) across container
+      # restarts and rebuilds.
+      - applyarr_data:/app/data
+    restart: unless-stopped
+    # Chromium requires a larger /dev/shm than the Docker default (64 MB).
+    shm_size: '256m'
+
+volumes:
+  applyarr_data:
+    driver: local

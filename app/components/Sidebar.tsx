@@ -16,6 +16,8 @@ export default function Sidebar() {
       flexDirection: 'column',
       gap: '1.5rem',
       position: 'fixed',
+      left: 0,
+      top: 0,
     }}>
       {/* Logo */}
       <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', textDecoration: 'none' }}>
