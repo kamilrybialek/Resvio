@@ -66,10 +66,10 @@ export function middleware(req: NextRequest): NextResponse {
   // Hostname-based routing
   // ---------------------------------------------------------------------------
 
-  // 2a. resvio.online — public marketing / landing domain.
+  // 2a. resvio.online / www.resvio.online — public marketing / landing domain.
   //     Rewrite every request to /landing so the Next.js page at
   //     app/landing/page.tsx is served without exposing the app.
-  if (hostname === 'resvio.online') {
+  if (hostname === 'resvio.online' || hostname === 'www.resvio.online') {
     const url = req.nextUrl.clone();
     url.pathname = '/landing';
     return NextResponse.rewrite(url);
@@ -83,9 +83,9 @@ export function middleware(req: NextRequest): NextResponse {
     // protected) simply return NextResponse.next() instead.
   }
 
-  // 2c. Vercel preview deployments (resvio-*.vercel.app) and localhost.
+  // 2c. Vercel preview deployments and localhost.
   //     Both need basic auth to protect the staging environment.
-  const isVercelPreview = /^resvio(-[a-z0-9]+)*\.vercel\.app$/.test(hostname);
+  const isVercelPreview = /^(resvio|applyarr)(-[a-z0-9]+)*(-[a-z0-9]+-projects)?\.vercel\.app$/.test(hostname);
   const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
 
   if (isVercelPreview || isLocalhost) {
