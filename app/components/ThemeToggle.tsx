@@ -14,10 +14,10 @@ export default function ThemeToggle() {
     setDark(next);
     if (next) {
       document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('applyarr-theme', 'dark');
+      localStorage.setItem('resvio-theme', 'dark');
     } else {
       document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('applyarr-theme', 'light');
+      localStorage.setItem('resvio-theme', 'light');
     }
   };
 

@@ -1,6 +1,6 @@
-# Deploying Applyarr on TrueNAS SCALE
+# Deploying Resvio on TrueNAS SCALE
 
-This guide walks through running Applyarr as a persistent Docker container on
+This guide walks through running Resvio as a persistent Docker container on
 TrueNAS SCALE, including LinkedIn/Indeed scraping via Playwright and a
 persistent profile database.
 
@@ -9,7 +9,7 @@ persistent profile database.
 ## Prerequisites
 
 - TrueNAS SCALE 23.10 (Cobia) or newer
-- A dataset on your pool for the app files, e.g. `tank/applyarr`
+- A dataset on your pool for the app files, e.g. `tank/resvio`
 - SSH access to the TrueNAS host (enable under **System > Services > SSH**)
 - Docker Compose available — TrueNAS SCALE ships with `docker` via the
   built-in container runtime.  You can also install Portainer from the
@@ -31,9 +31,9 @@ ssh admin@<your-nas-ip>
 
 ```bash
 # Adjust the path to wherever you store your app data
-mkdir -p /mnt/tank/applyarr
-cd /mnt/tank/applyarr
-git clone https://github.com/<your-fork>/applyarr.git .
+mkdir -p /mnt/tank/resvio
+cd /mnt/tank/resvio
+git clone https://github.com/<your-fork>/resvio.git .
 ```
 
 If you do not have git on the NAS, you can `scp` or `rsync` the project
@@ -42,13 +42,13 @@ folder from your development machine instead:
 ```bash
 # Run this from your dev machine, not the NAS
 rsync -avz --exclude node_modules --exclude .next \
-    /path/to/Applyarr/ admin@<nas-ip>:/mnt/tank/applyarr/
+    /path/to/Resvio/ admin@<nas-ip>:/mnt/tank/resvio/
 ```
 
 ### 3. Create the environment file
 
 ```bash
-cd /mnt/tank/applyarr
+cd /mnt/tank/resvio
 cp .env.example .env.local 2>/dev/null || touch .env.local
 nano .env.local
 ```
@@ -75,7 +75,7 @@ cat .env.local > .env
 ### 4. Build and start the container
 
 ```bash
-cd /mnt/tank/applyarr
+cd /mnt/tank/resvio
 docker compose up -d --build
 ```
 
@@ -86,7 +86,7 @@ installs all packages.  Subsequent startups are fast.
 
 ```bash
 docker compose ps
-docker compose logs -f applyarr
+docker compose logs -f resvio
 ```
 
 Open `http://<your-nas-ip>:3000` in a browser on your local network.
@@ -112,39 +112,39 @@ Open `http://<your-nas-ip>:3000` in a browser on your local network.
 
 ## Persistent Storage
 
-The `docker-compose.yml` declares a named volume `applyarr_data` which maps
+The `docker-compose.yml` declares a named volume `resvio_data` which maps
 to `/app/data` inside the container.  This is where `data/profile.json` (the
 user profile / CV database) lives.
 
 Docker stores named volumes under:
 
 ```
-/var/lib/docker/volumes/applyarr_applyarr_data/
+/var/lib/docker/volumes/resvio_resvio_data/
 ```
 
 on TrueNAS SCALE.  To back it up:
 
 ```bash
 docker run --rm \
-  -v applyarr_applyarr_data:/data \
+  -v resvio_resvio_data:/data \
   -v /mnt/tank/backups:/backup \
-  busybox tar czf /backup/applyarr_data_$(date +%F).tar.gz /data
+  busybox tar czf /backup/resvio_data_$(date +%F).tar.gz /data
 ```
 
 If you prefer to store the data on a specific TrueNAS dataset (e.g.
-`tank/applyarr/data`), replace the named volume in `docker-compose.yml` with
+`tank/resvio/data`), replace the named volume in `docker-compose.yml` with
 a bind mount:
 
 ```yaml
 volumes:
-  - /mnt/tank/applyarr/data:/app/data
+  - /mnt/tank/resvio/data:/app/data
 ```
 
 ---
 
 ## Accessing the App on Your Local Network
 
-Once the container is running, access Applyarr at:
+Once the container is running, access Resvio at:
 
 ```
 http://<your-nas-ip>:3000
@@ -159,18 +159,18 @@ The middleware password (set in `middleware.ts`) is: see `CLAUDE.md`.
 If you run a local DNS resolver (e.g. Pi-hole, AdGuard, or TrueNAS's own
 **Local DNS** under **Network > Global Configuration**):
 
-1. Add an A record: `applyarr.local` → `<your-nas-ip>`
-2. Access the app at `http://applyarr.local:3000`
+1. Add an A record: `resvio.local` → `<your-nas-ip>`
+2. Access the app at `http://resvio.local:3000`
 
 For port 80 without specifying a port, place a reverse proxy (e.g. **Nginx
 Proxy Manager** from the Apps catalogue) in front of the container and
-proxy `applyarr.local` → `localhost:3000`.
+proxy `resvio.local` → `localhost:3000`.
 
 ---
 
 ## Playwright / LinkedIn / Indeed Scrapers
 
-Applyarr includes Playwright-based scrapers for LinkedIn and Indeed.  These
+Resvio includes Playwright-based scrapers for LinkedIn and Indeed.  These
 scrapers are **disabled on Vercel** (gated by `VERCEL !== '1'`) but are
 **fully active inside the Docker container** because `VERCEL` is not set.
 
@@ -186,13 +186,13 @@ If scraping stops working, increase `shm_size` to `'512m'` and rebuild.
 ## Updating the App
 
 ```bash
-cd /mnt/tank/applyarr
+cd /mnt/tank/resvio
 
 # Pull latest code
 git pull
 
 # Rebuild the image and restart the container
-# (the applyarr_data volume is preserved automatically)
+# (the resvio_data volume is preserved automatically)
 docker compose up -d --build
 ```
 
@@ -208,7 +208,7 @@ docker image prune -f
 
 | Symptom | Fix |
 |---|---|
-| Container exits immediately | `docker compose logs applyarr` — likely a missing API key or build error |
+| Container exits immediately | `docker compose logs resvio` — likely a missing API key or build error |
 | Chromium crashes / blank scraper results | Increase `shm_size` to `512m` in `docker-compose.yml` |
 | Port 3000 already in use | Change the host port: `"3001:3000"` in `docker-compose.yml` |
 | `data/profile.json` lost after update | Check that you are using the named volume, not a bind mount to `.next/` |

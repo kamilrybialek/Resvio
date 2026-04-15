@@ -74,7 +74,7 @@ export default function Sidebar({ market = 'scandinavia', onMarketChange }: Side
             </svg>
           </div>
           <span style={{ fontSize: '1.1rem', fontWeight: '800', letterSpacing: '-0.03em', color: 'var(--text-primary)' }}>
-            Apply<span style={{ background: 'var(--gradient-brand)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>arr</span>
+            Res<span style={{ background: 'var(--gradient-brand)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>vio</span>
           </span>
         </Link>
       </div>
@@ -138,7 +138,7 @@ export default function Sidebar({ market = 'scandinavia', onMarketChange }: Side
       {/* ── Bottom divider + version ── */}
       <div style={{ padding: '12px 20px 20px', borderTop: '1px solid var(--border-dim)' }}>
         <p style={{ fontSize: '0.62rem', color: 'var(--text-tertiary)', textAlign: 'center' }}>
-          Applyarr · AI-powered job search
+          Resvio · AI-powered job search
         </p>
       </div>
     </aside>

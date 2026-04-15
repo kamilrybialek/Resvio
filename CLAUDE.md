@@ -1,4 +1,4 @@
-# Developer Guide for Applyarr
+# Developer Guide for Resvio
 
 This guide provides specific instructions for Claude/Windsurf agents to build and maintain the project.
 

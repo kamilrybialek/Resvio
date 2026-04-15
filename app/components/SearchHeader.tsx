@@ -112,7 +112,7 @@ const DATE_OPTIONS = [
 ];
 
 const QUICK_FILTERS = ['1h', '4h', '24h', '48h', '7d'];
-const STORAGE_KEY = 'applyarr_presets';
+const STORAGE_KEY = 'resvio_presets';
 const MAX_RECENT = 8;
 
 function loadPresets(): SearchPreset[] {

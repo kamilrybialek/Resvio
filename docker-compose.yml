@@ -2,10 +2,10 @@ version: '3.8'
 
 services:
 
-  # ── Applyarr app ────────────────────────────────────────────────────────────
-  applyarr:
+  # ── Resvio app ────────────────────────────────────────────────────────────
+  resvio:
     build: .
-    container_name: applyarr
+    container_name: resvio
     ports:
       - "3000:3000"       # direct LAN access: http://192.168.1.249:3000
     environment:
@@ -14,7 +14,7 @@ services:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       # VERCEL must NOT be set here — that would disable Playwright scrapers
     volumes:
-      - applyarr_data:/app/data   # persists profile.json across rebuilds
+      - resvio_data:/app/data   # persists profile.json across rebuilds
     restart: unless-stopped
     shm_size: '256m'              # Chromium needs > 64 MB /dev/shm
     healthcheck:
@@ -25,30 +25,30 @@ services:
       start_period: 40s
 
   # ── Cloudflare Tunnel ───────────────────────────────────────────────────────
-  # Exposes app.yourdomain.com → applyarr:3000 without opening any firewall ports.
+  # Exposes app.yourdomain.com → resvio:3000 without opening any firewall ports.
   #
   # SETUP (one-time):
   #   1. Go to https://dash.cloudflare.com → Zero Trust → Networks → Tunnels
-  #   2. Create a tunnel, name it "applyarr-nas"
+  #   2. Create a tunnel, name it "resvio-nas"
   #   3. Copy the tunnel token (starts with eyJ...)
   #   4. Add it to .env:  CLOUDFLARE_TUNNEL_TOKEN=eyJ...
   #   5. In Cloudflare Tunnel dashboard add a Public Hostname:
-  #        Subdomain: app   Domain: yourdomain.com
-  #        Service:   http://applyarr:3000
+  #        Subdomain: app   Domain: resvio.online
+  #        Service:   http://resvio:3000
   #
   cloudflared:
     image: cloudflare/cloudflared:latest
-    container_name: applyarr-tunnel
+    container_name: resvio-tunnel
     restart: unless-stopped
     command: tunnel --no-autoupdate run
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN:-}
     depends_on:
-      applyarr:
+      resvio:
         condition: service_healthy
     profiles:
       - tunnel   # only starts when COMPOSE_PROFILES=tunnel (see .env)
 
 volumes:
-  applyarr_data:
+  resvio_data:
     driver: local

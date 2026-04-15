@@ -4,9 +4,9 @@ description: Core architecture and CV engine details for the Resvio job applicat
 type: project
 ---
 
-AI-powered job application assistant for the Scandinavian market (Sweden, Denmark, Norway).
+AI-powered job application assistant for the European market (Sweden, Denmark, Norway, Poland, and more).
 
-**Why:** Automates job searching, CV tailoring, and application preparation for Scandinavian employers.
+**Why:** Automates job searching, CV tailoring, and application preparation for European employers.
 
 **How to apply:** When making any changes, respect Scandinavian aesthetic (glassmorphism, gold/teal accents), and ATS-optimization requirements for CVs.
 

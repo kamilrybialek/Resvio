@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ── Applyarr → NAS deployment ────────────────────────────────────────────────
+# ── Resvio → NAS deployment ────────────────────────────────────────────────
 # Run from your Mac terminal:  bash deploy-nas.sh
 #
 # What it does:
@@ -10,13 +10,13 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 NAS_HOST="truenas_admin@192.168.1.249"
-NAS_PATH="/mnt/ssd/appdata/applyarr"
+NAS_PATH="/mnt/ssd/appdata/resvio"
 LOCAL_PATH="$(cd "$(dirname "$0")" && pwd)"
 WITH_TUNNEL="${1:-}"   # pass "tunnel" as arg to also start cloudflared
 
 set -e
 echo "╔═══════════════════════════════════╗"
-echo "║   Applyarr → NAS deployment       ║"
+echo "║   Resvio → NAS deployment         ║"
 echo "╚═══════════════════════════════════╝"
 echo ""
 
@@ -72,5 +72,5 @@ echo "║                                                       ║"
 echo "║  LAN:    http://192.168.1.249:3000                    ║"
 echo "╚═══════════════════════════════════════════════════════╝"
 echo ""
-echo "Logs:    ssh $NAS_HOST 'docker logs applyarr -f'"
+echo "Logs:    ssh $NAS_HOST 'docker logs resvio -f'"
 echo "Tunnel:  bash deploy-nas.sh tunnel"

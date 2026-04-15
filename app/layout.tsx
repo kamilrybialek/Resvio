@@ -8,15 +8,15 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Applyarr | Scandinavian Job Hunt",
-  description: "AI-Powered Job Search & Application Assistant for the Nordic market",
+  title: "Resvio — AI-Powered Job Search for Europe",
+  description: "AI-Powered Career Accelerator for Europe",
 };
 
 // Inline script: reads localStorage before React hydrates → prevents theme flash
 const themeInitScript = `
 (function(){
   try {
-    var t = localStorage.getItem('applyarr-theme');
+    var t = localStorage.getItem('resvio-theme');
     if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
     else document.documentElement.removeAttribute('data-theme');
   } catch(e){}

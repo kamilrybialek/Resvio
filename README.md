@@ -1,6 +1,6 @@
-# 🚀 Applyarr
+# 🚀 Resvio
 
-**Applyarr** is a premium AI-powered job application assistant designed for the Scandinavian market. It aggregates jobs from multiple sources, analyzes descriptions, and tailors professional CVs using a high-end Scandinavian design system.
+**Resvio** is a premium AI-powered job application assistant designed for the European market. It aggregates jobs from multiple sources, analyzes descriptions, and tailors professional CVs using a high-end Scandinavian design system.
 
 ## ✨ Features
 - **Smart Aggregation**: Search LinkedIn, Indeed, JobTech, and The Hub in one place.

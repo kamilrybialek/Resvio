@@ -1,3 +1,3 @@
 # Memory Index
 
-- [Project: Applyarr Overview](project_applyarr.md) — AI-powered job application assistant for Scandinavian market, Next.js App Router, CV engine in apply/page.tsx
+- [Project: Resvio Overview](project_resvio.md) — AI-powered job application assistant for European market, Next.js App Router, CV engine in apply/page.tsx

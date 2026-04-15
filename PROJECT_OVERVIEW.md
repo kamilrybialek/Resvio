@@ -1,6 +1,6 @@
-# 🚀 Applyarr: Project Overview & Technical Handover
+# 🚀 Resvio: Project Overview & Technical Handover
 
-Applyarr is a premium, AI-powered job application assistant specifically tailored for the Scandinavian market (Sweden, Denmark, Norway). It aims to automate the tedious parts of job searching—finding listings, analyzing descriptions, and tailoring CVs—while maintaining a high-end, professional aesthetic.
+Resvio is a premium, AI-powered job application assistant specifically tailored for the European market (Sweden, Denmark, Norway, Poland, and more). It aims to automate the tedious parts of job searching—finding listings, analyzing descriptions, and tailoring CVs—while maintaining a high-end, professional aesthetic.
 
 ---
 
