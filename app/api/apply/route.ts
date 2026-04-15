@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ProfileService } from '@/lib/services/profile-service';
+import { TrackerService } from '@/lib/services/tracker-service';
 
 export async function POST(req: NextRequest) {
-  const { jobUrl, tailoredCvPath, jobId, toggle, currentlyApplied } = await req.json();
+  const body = await req.json();
+  const { jobUrl, tailoredCvPath, jobId, toggle, currentlyApplied } = body;
   const profile = ProfileService.getProfile();
 
   if (!profile) {
@@ -12,6 +14,17 @@ export async function POST(req: NextRequest) {
   // Toggle mode: just mark/unmark and return
   if (toggle && jobId) {
     const newState = ProfileService.toggleJobApplied(jobId);
+    // Add to tracker when marking as applied
+    if (newState && body.jobTitle) {
+      TrackerService.upsert({
+        jobId,
+        jobTitle: body.jobTitle || jobId,
+        company: body.company || '',
+        location: body.location || '',
+        source: body.source || '',
+        url: body.jobUrl || '',
+      });
+    }
     return NextResponse.json({ applied: newState });
   }
 

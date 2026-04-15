@@ -1,4 +1,4 @@
-export type JobSource = 'Arbetsförmedlingen' | 'The Hub' | 'LinkedIn' | 'Indeed' | 'Blocket' | 'Other';
+export type JobSource = 'Arbetsförmedlingen' | 'The Hub' | 'LinkedIn' | 'Indeed' | 'Blocket' | 'JustJoinIT' | 'RocketJobs' | 'Other';
 
 export interface Job {
   id: string;

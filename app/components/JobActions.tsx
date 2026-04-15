@@ -23,47 +23,46 @@ export default function JobActions({ job, isApplied, onToggleApplied }: JobActio
       await fetch('/api/apply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ jobId: job.id, jobUrl: job.url, jobTitle: job.title, toggle: true, currentlyApplied: isApplied }),
+        body: JSON.stringify({
+          jobId: job.id, jobUrl: job.url, jobTitle: job.title,
+          company: job.company, location: job.location, source: job.source,
+          toggle: true, currentlyApplied: isApplied,
+        }),
       });
       onToggleApplied(job.id);
     } catch {
-      onToggleApplied(job.id); // optimistic update even on error
+      onToggleApplied(job.id);
     }
     setLoading(false);
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
-      {/* Applied toggle */}
+    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
       <button
         onClick={handleToggleApplied}
         disabled={loading}
-        title={isApplied ? 'Mark as not applied' : 'Mark as applied'}
-        style={{
-          padding: '7px 14px',
-          borderRadius: '8px',
-          background: isApplied ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.05)',
-          border: isApplied ? '1px solid rgba(16,185,129,0.4)' : '1px solid var(--glass-border)',
-          color: isApplied ? '#34d399' : 'var(--glacier)',
-          fontWeight: '600', fontSize: '0.8rem',
-          cursor: 'pointer', transition: 'all 0.15s',
-        }}
+        className={isApplied ? 'btn btn-success' : 'btn btn-ghost'}
+        style={{ padding: '6px 14px', fontSize: 'var(--text-xs)', borderRadius: 'var(--r-full)' }}
       >
-        {isApplied ? '✓ Applied' : 'Mark applied'}
+        {isApplied ? (
+          <>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            Applied
+          </>
+        ) : 'Mark applied'}
       </button>
 
-      {/* Open apply page */}
       <button
         onClick={openApplyPage}
-        style={{
-          padding: '7px 18px',
-          borderRadius: '8px',
-          background: 'linear-gradient(135deg, var(--nordic-blue), var(--nordic-teal))',
-          color: 'white', fontWeight: '600', fontSize: '0.875rem',
-          border: 'none', cursor: 'pointer',
-        }}
+        className="btn btn-primary"
+        style={{ padding: '6px 16px', fontSize: 'var(--text-xs)' }}
       >
-        Apply Now ✦
+        Tailor CV
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
       </button>
     </div>
   );

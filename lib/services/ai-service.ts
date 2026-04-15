@@ -16,59 +16,59 @@ export class AIService {
   private static anthropic = process.env.ANTHROPIC_API_KEY ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }) : null;
 
   static async analyzeMatch(
-    job: Job, 
-    baseCv: string, 
+    job: Job,
+    baseCv: string,
     provider: AIProvider = 'openai'
   ): Promise<AnalysisResult> {
-    const prompt = `
-      You are an expert HR consultant for the Scandinavian market.
-      Analyze this job offer and the candidate's base CV.
-      
-      Job Title: ${job.title}
-      Company: ${job.company}
-      Description: ${job.description}
-      
-      Candidate CV:
-      ${baseCv}
-      
-      Return a JSON object with:
-      1. "score": Match percentage (0-100).
-      2. "reasoning": 2-sentence match explanation.
-      3. "tailoringTips": Specific advice for this job.
-      4. "tailoredSummary": A rewritten professional summary (3-4 sentences) for this specific application.
-    `;
+    // Truncate inputs to control token usage
+    const cvExcerpt = baseCv.slice(0, 3000);
+    const jobDesc = (job.description || '').slice(0, 1000);
+
+    const systemPrompt = 'You are a Scandinavian job market recruiter. Analyze CV-job fit. Output ONLY valid JSON, no markdown fences.';
+
+    const userPrompt = `Rate this candidate for the job. Return JSON with exactly these keys:
+- "score": integer 0-100 (skills match, seniority fit, domain relevance)
+- "reasoning": 1-2 sentences on why the score is what it is
+- "tailoringTips": 1 concrete action to strengthen this application
+
+JOB: ${job.title} at ${job.company}${job.location ? ` (${job.location})` : ''}
+${jobDesc}
+
+CANDIDATE CV:
+${cvExcerpt}`;
 
     if (provider === 'openai' && this.openai) {
       const response = await this.openai.chat.completions.create({
-        model: 'gpt-4-turbo-preview',
-        messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' }
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        response_format: { type: 'json_object' },
+        max_tokens: 350,
+        temperature: 0,
       });
-      return JSON.parse(response.choices[0].message.content || '{}');
+      const parsed = JSON.parse(response.choices[0].message.content || '{}');
+      return { score: 75, reasoning: '', tailoringTips: '', tailoredSummary: '', ...parsed };
     }
 
     if (provider === 'anthropic' && this.anthropic) {
       const response = await this.anthropic.messages.create({
-        model: 'claude-3-haiku-20240307',
-        max_tokens: 1024,
-        system: "You are a job market expert. Always output JSON.",
-        messages: [{ role: 'user', content: prompt }]
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 350,
+        temperature: 0,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }],
       });
-      // @ts-ignore
-      return JSON.parse(response.content[0].text);
+      const parsed = JSON.parse((response.content[0] as { type: string; text: string }).text || '{}');
+      return { score: 75, reasoning: '', tailoringTips: '', tailoredSummary: '', ...parsed };
     }
 
-    // Fallback/Mock
     return {
-      score: 85,
-      reasoning: "Strong match for design roles in Sweden.",
-      tailoringTips: "Highlight Figma and Nordic design principles.",
-      tailoredSummary: "Experienced Graphic Designer with a focus on Scandinavian minimalism..."
+      score: 75,
+      reasoning: 'AI analysis unavailable — no API key configured.',
+      tailoringTips: 'Add your OpenAI or Anthropic API key in .env.local.',
+      tailoredSummary: '',
     };
-  }
-
-  static async generateTailoredCV(job: Job, baseCv: string, provider: AIProvider = 'openai'): Promise<string> {
-    // Similar logic to analyzeMatch but focused on full CV rewriting
-    return "This is a placeholder for a fully tailored CV in Markdown.";
   }
 }

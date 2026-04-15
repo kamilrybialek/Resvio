@@ -22,42 +22,48 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ scores: {} });
     }
 
+    // Use CV excerpt (skills + recent experience) — full CV wastes tokens in batch mode
+    const cvExcerpt = baseCv.slice(0, 2500);
+
     const jobListText = jobs
-      .map(j => `[${j.id}] ${j.title} at ${j.company}\n${(j.description || j.title).slice(0, 300)}`)
-      .join('\n\n');
+      .map(j => `[${j.id}] ${j.title} @ ${j.company}${j.location ? ` (${j.location})` : ''}: ${(j.description || j.title).slice(0, 250)}`)
+      .join('\n');
 
-    const prompt = `You are a professional recruiter. Analyze this candidate's CV against multiple job postings.
+    const systemPrompt = 'You are a recruiter. Score CV-job matches. Output ONLY valid JSON, no markdown.';
+    const userPrompt = `Score each job for this candidate (0-100). Criteria: skills match, seniority fit, industry relevance, location fit.
 
-CANDIDATE CV:
-${baseCv}
+CANDIDATE:
+${cvExcerpt}
 
-JOB POSTINGS:
+JOBS:
 ${jobListText}
 
-Return ONLY a JSON object where each key is a job ID and the value is a match percentage (0-100).
-Consider: skills match, experience level, industry fit, location relevance.
-Example: {"job-id-1": 78, "job-id-2": 45}`;
+Return JSON: {"job-id": score, ...}`;
 
     let scores: Record<string, number> = {};
 
     if (process.env.OPENAI_API_KEY) {
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      const model = 'gpt-4o-mini';
       const response = await openai.chat.completions.create({
-        model,
-        messages: [{ role: 'user', content: prompt }],
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
         response_format: { type: 'json_object' },
-        max_tokens: 1500,
+        max_tokens: 400,
+        temperature: 0,
       });
       const raw = response.choices[0].message.content || '{}';
       scores = JSON.parse(raw);
     } else if (process.env.ANTHROPIC_API_KEY) {
       const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
       const response = await anthropic.messages.create({
-        model: 'claude-haiku-4-5',
-        max_tokens: 1500,
-        system: 'You are a professional recruiter. Always output valid JSON only, no markdown, no explanation.',
-        messages: [{ role: 'user', content: prompt }],
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 400,
+        temperature: 0,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }],
       });
       const raw = (response.content[0] as { type: string; text: string }).text || '{}';
       scores = JSON.parse(raw);

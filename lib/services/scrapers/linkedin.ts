@@ -11,12 +11,20 @@ export class LinkedInScraper {
     const start = (pageNumber - 1) * limit;
     
     let url = `https://www.linkedin.com/jobs/search?keywords=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}&start=${start}`;
-    
+
     if (dateFilter && dateFilter !== 'any') {
+      // f_TPR uses seconds: r{seconds}
       const tprMap: Record<string, string> = {
+        '1h':  'r3600',
+        '2h':  'r7200',
+        '4h':  'r14400',
+        '12h': 'r43200',
         '24h': 'r86400',
-        '7d': 'r604800',
-        '30d': 'r2592000'
+        '48h': 'r172800',
+        '72h': 'r259200',
+        '7d':  'r604800',
+        '14d': 'r1209600',
+        '30d': 'r2592000',
       };
       if (tprMap[dateFilter]) {
         url += `&f_TPR=${tprMap[dateFilter]}`;

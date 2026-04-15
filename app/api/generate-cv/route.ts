@@ -29,120 +29,62 @@ export async function POST(req: NextRequest) {
       CV_TEMPLATES.find((t) => t.id === (templateId || DEFAULT_TEMPLATE_ID)) ??
       CV_TEMPLATES[1];
 
-    const jobDescription = manualDescription || job.description || 'No description provided.';
+    const jobDescription = (manualDescription || job.description || '').slice(0, 2000);
+    const cvProfile = baseCv.slice(0, 5000);
     const provider: 'openai' | 'anthropic' = process.env.OPENAI_API_KEY ? 'openai' : 'anthropic';
 
-    const prompt = `You are a professional CV generation agent. Your sole task is to produce a single, ATS-optimized, GDPR-compliant CV in Markdown format.
+    const systemPrompt = `You are an expert CV writer for the Scandinavian job market. You produce ATS-optimized, GDPR-compliant, one-page CVs in Markdown. Output ONLY the CV Markdown — no preamble, no explanations.`;
 
-═══════════════════════════════════════════════════════════════
-INPUTS
-═══════════════════════════════════════════════════════════════
+    const userPrompt = `Write a tailored CV using the candidate profile below.
 
-[JOB_OFFER]
-Title: ${job.title}
-Company: ${job.company}
-Location: ${job.location}
-Description:
+JOB: ${job.title} at ${job.company}${job.location ? ` — ${job.location}` : ''}
 ${jobDescription}
 
-[CV_TEMPLATE: ${template.name}]
+TEMPLATE: ${template.name}
 Layout: ${template.layoutHint}
 Section order: ${template.sectionOrder.join(' → ')}
 
-[USER_PROFILE]
-${baseCv}
+CANDIDATE PROFILE:
+${cvProfile}
 
-═══════════════════════════════════════════════════════════════
-GENERATION RULES
-═══════════════════════════════════════════════════════════════
+RULES:
+1. LANGUAGE — Detect job offer language (English/Swedish/Polish/Norwegian/Danish) and write entire CV in that language.
+2. ACCURACY — Use ONLY facts from CANDIDATE PROFILE. Never invent, assume, or extrapolate.
+3. PROFESSIONAL TITLE (## line) — Use the candidate's OWN professional title/role from their profile (e.g. "Software Engineer", "UX Designer"). Do NOT use the target job title as the professional title. The target job keywords should appear naturally in the SUMMARY instead.
+4. ATS SUMMARY — First sentence of summary must naturally reference the target role and mirror 2–3 key requirements from the job description (only when truthful about the candidate).
+5. BULLETS — Format: [Action verb] + [scope/task] + [result]. No verb repeated more than twice. Most recent role: 4–5 bullets. Older roles: 2–3 bullets. Skip roles >7 years old.
+6. DATES — Always MM/YYYY — MM/YYYY. Active role: MM/YYYY — Present.
+7. ONE PAGE — Summary: 2–3 sentences. Skills: max 12, comma-separated. Education: 1 line per entry.
+8. GDPR — No DOB, nationality, gender, photo, ID, home address. End with the following GDPR consent footer (translate only if CV language is Swedish/Norwegian/Danish — for English and Polish use the exact text below):
+   - Polish/English CV: "*I agree to the processing of personal data provided in this document for realising the recruitment process pursuant to the Personal Data Protection Act of 10 May 2018 (Journal of Laws 2018, item 1000) and in agreement with Regulation (EU) 2016/679 of the European Parliament and of the Council of 27 April 2016 on the protection of natural persons with regard to the processing of personal data and on the free movement of such data, and repealing Directive 95/46/EC (General Data Protection Regulation).*"
+   - Swedish CV: "*Jag samtycker till behandling av mina personuppgifter i rekryteringssyfte enligt GDPR (EU) 2016/679.*"
+   - Norwegian CV: "*Jeg samtykker til behandling av mine personopplysninger for rekrutteringsformål i henhold til GDPR (EU) 2016/679.*"
+   - Danish CV: "*Jeg accepterer behandling af mine personoplysninger med henblik på rekrutteringsprocessen i henhold til GDPR (EU) 2016/679.*"
 
-LANGUAGE:
-Detect the language of [JOB_OFFER] and write the ENTIRE CV in that language.
-If the offer is in Swedish → CV in Swedish.
-If in English → CV in English.
-If in Polish → CV in Polish.
-
-DATA INTEGRITY (CRITICAL):
-- Use ONLY data present in [USER_PROFILE] — NEVER invent, assume, or interpolate
-- Every fact must be traceable to [USER_PROFILE]
-- Missing template fields: leave blank, do NOT mention them in the output
-
-ATS OPTIMIZATION:
-- The EXACT job title from [JOB_OFFER] must appear in:
-    (1) the header title line (## line)
-    (2) the first sentence of PROFESSIONAL SUMMARY
-- Extract required hard skills, soft skills, certifications, and industry terms from [JOB_OFFER]
-- For each keyword that has a factual basis in [USER_PROFILE]: inject it verbatim into the relevant section
-- Bullet point format: [Strong Action Verb] + [Task or Scope] + [Quantified Result when available]
-- No action verb repeated more than twice in the entire document
-- Most recent role: 4–5 bullets | Roles 2–3: 2–3 bullets | Roles older than 7 years: omit entirely
-
-DATES: Always MM/YYYY — MM/YYYY. Current role → MM/YYYY — Present
-
-GDPR COMPLIANCE:
-- Allowed: full name, professional email, phone, city + country, LinkedIn URL, portfolio URL
-- Forbidden: date of birth, age, nationality, gender, photo, national ID, full home address
-- Append the consent footer matching the CV language:
-    English: "I consent to the processing of my personal data included in this CV for the purposes of the current recruitment process, in accordance with Regulation (EU) 2016/679 (GDPR)."
-    Polish: "Wyrażam zgodę na przetwarzanie moich danych osobowych zawartych w tym CV na potrzeby aktualnego procesu rekrutacji, zgodnie z Rozporządzeniem (UE) 2016/679 (RODO)."
-    Swedish: "Jag samtycker till behandlingen av mina personuppgifter i detta CV för rekryteringsändamål, i enlighet med förordning (EU) 2016/679 (GDPR)."
-
-ONE-PAGE CONSTRAINT (STRICT):
-- Target exactly 1 A4 page — do not exceed it
-- PROFESSIONAL SUMMARY: 2–3 sentences only
-- Include maximum 4–5 work experience entries (most recent / most relevant first)
-- SKILLS & COMPETENCIES: comma-separated list, max 12 items, no sub-categories
-- EDUCATION: 1–2 lines per entry only, no elaboration
-- Omit roles older than 7 years entirely
-
-═══════════════════════════════════════════════════════════════
-REQUIRED OUTPUT FORMAT — follow exactly
-═══════════════════════════════════════════════════════════════
-
-# [FULL NAME]
-## [Exact job title from JOB_OFFER]
-
-CONTACT: [Email] | [Phone] | [City, Country] | [LinkedIn URL if available]
+OUTPUT FORMAT:
+# [Full Name]
+## [Candidate's own professional title from their profile]
+CONTACT: [Email] | [Phone] | [City, Country] | [LinkedIn if available]
 
 ## PROFESSIONAL SUMMARY
-[2–3 sentences. First sentence must contain the exact job title.]
+[2–3 sentences. Reference the target role naturally. Do NOT start with "I am applying for..."]
 
 ## PROFESSIONAL EXPERIENCE
-
-### [Job Title] | [Company] | [MM/YYYY — MM/YYYY or Present]
-[City, Country]
-- [Action verb + task + result/scope]
-- [Action verb + task + result/scope]
-- [Action verb + task + result/scope]
-
-[Repeat for each relevant role, most recent first]
+### [Title] | [Company] | [MM/YYYY — MM/YYYY]
+[City]
+- [bullet]
 
 ## EDUCATION
-
 ### [Degree] | [Institution] | [YYYY]
 
 ## SKILLS & COMPETENCIES
-[Skill1], [Skill2], [Skill3], ... (max 12, comma-separated)
+[skill1], [skill2], ... (max 12)
 
 ## LANGUAGES
-[Language]: [Level], [Language]: [Level]
+[Language]: [Level]
 
 ---
-*[GDPR consent in detected CV language]*
-
-═══════════════════════════════════════════════════════════════
-QUALITY GATES — verify before output
-═══════════════════════════════════════════════════════════════
-[ ] Job title from JOB_OFFER appears in header (## line) and first sentence of summary
-[ ] All action verbs unique (no verb repeated more than twice)
-[ ] All dates in MM/YYYY format
-[ ] No forbidden personal data included
-[ ] No invented or assumed facts
-[ ] GDPR footer present as last element
-[ ] Fits within 1 A4 page (strict)
-[ ] Only data from [USER_PROFILE] used
-
-OUTPUT: Return the CV in Markdown ONLY — no preamble, no explanations, no metadata.`;
+*[GDPR consent — use exact text from rule 8 matching CV language]*`;
 
     let tailoredCv = '';
 
@@ -151,8 +93,12 @@ OUTPUT: Return the CV in Markdown ONLY — no preamble, no explanations, no meta
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
       const response = await openai.chat.completions.create({
         model: 'gpt-4o',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 3000,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        max_tokens: 2200,
+        temperature: 0.3,
       });
       tailoredCv = response.choices[0].message.content || '';
     } else if (process.env.ANTHROPIC_API_KEY) {
@@ -160,8 +106,10 @@ OUTPUT: Return the CV in Markdown ONLY — no preamble, no explanations, no meta
       const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
       const response = await anthropic.messages.create({
         model: 'claude-sonnet-4-6',
-        max_tokens: 3000,
-        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 2200,
+        temperature: 0.3,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }],
       });
       // @ts-ignore
       tailoredCv = response.content[0].text;
