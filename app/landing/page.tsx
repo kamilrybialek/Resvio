@@ -1368,63 +1368,76 @@ export default function LandingPage() {
       <section className="section" id="pricing">
         <div className="section-header">
           <div className="section-tag">Pricing</div>
-          <h2 className="section-title">Simple, transparent pricing</h2>
-          <p className="section-sub">Start free. Upgrade when you&apos;re ready.</p>
+          <h2 className="section-title">Pay per CV — no subscription</h2>
+          <p className="section-sub">Buy a pack once. Use it whenever you need. Credits never expire.</p>
         </div>
 
         <div className="pricing-grid">
-          {/* Free */}
+          {/* Pack 10 */}
           <div className="pricing-card">
-            <div className="pricing-plan">Free</div>
-            <div className="pricing-price">0 <span>kr/mo</span></div>
-            <p className="pricing-desc">For casual job seekers exploring new opportunities</p>
+            <div className="pricing-plan">Starter Pack</div>
+            <div className="pricing-price">39 <span>kr</span></div>
+            <div style={{fontSize:'12px',color:'var(--text-muted)',marginTop:'-8px',marginBottom:'16px'}}>4.9 kr per CV</div>
+            <p className="pricing-desc">Perfect for a focused job search sprint</p>
             <ul className="pricing-features">
-              <li>3 CV tailorings per month</li>
-              <li>Basic job search</li>
-              <li>1 market</li>
-              <li>Community support</li>
+              <li>10 AI-tailored CVs</li>
+              <li>10 cover letters</li>
+              <li>All European markets</li>
+              <li>AI match scoring</li>
+              <li>Credits never expire</li>
             </ul>
-            <a href="/search" className="pricing-btn pricing-btn-secondary">Get started free</a>
+            <a href="/search" className="pricing-btn pricing-btn-secondary">Buy Starter Pack</a>
           </div>
 
-          {/* Starter — Featured */}
+          {/* Pack 30 — Featured */}
           <div className="pricing-card featured">
-            <div className="pricing-badge">⭐ Most Popular</div>
-            <div className="pricing-plan">Starter</div>
-            <div className="pricing-price">49 <span>kr/mo</span></div>
-            <p className="pricing-desc">For active job seekers ready to move fast</p>
+            <div className="pricing-badge">⭐ Best Value</div>
+            <div className="pricing-plan">Growth Pack</div>
+            <div className="pricing-price">89 <span>kr</span></div>
+            <div style={{fontSize:'12px',color:'var(--teal)',marginTop:'-8px',marginBottom:'16px',fontWeight:600}}>3.0 kr per CV · save 39%</div>
+            <p className="pricing-desc">For serious job seekers applying across multiple markets</p>
             <ul className="pricing-features">
-              <li>15 CV tailorings per month</li>
-              <li>Cover letters included</li>
-              <li>All 5 European markets</li>
+              <li>30 AI-tailored CVs</li>
+              <li>30 cover letters</li>
+              <li>All European markets</li>
               <li>AI match scoring</li>
               <li>Priority support</li>
+              <li>Credits never expire</li>
             </ul>
-            <a href="/search" className="pricing-btn pricing-btn-primary">Start Starter →</a>
+            <a href="/search" className="pricing-btn pricing-btn-primary">Buy Growth Pack →</a>
           </div>
 
-          {/* Pro */}
+          {/* Pack 50 */}
           <div className="pricing-card">
-            <div className="pricing-plan">Pro</div>
-            <div className="pricing-price">149 <span>kr/mo</span></div>
-            <p className="pricing-desc">For power users and career professionals</p>
+            <div className="pricing-plan">Pro Pack</div>
+            <div className="pricing-price">129 <span>kr</span></div>
+            <div style={{fontSize:'12px',color:'var(--text-muted)',marginTop:'-8px',marginBottom:'16px'}}>2.6 kr per CV · save 47%</div>
+            <p className="pricing-desc">Maximum firepower for career transitions</p>
             <ul className="pricing-features">
-              <li>Unlimited CV tailorings</li>
+              <li>50 AI-tailored CVs</li>
+              <li>50 cover letters</li>
+              <li>All European markets</li>
+              <li>AI match scoring</li>
               <li>Multiple CV profiles</li>
-              <li>Advanced analytics</li>
-              <li>API access</li>
-              <li>All markets + priority indexing</li>
+              <li>Credits never expire</li>
             </ul>
-            <a href="/search" className="pricing-btn pricing-btn-secondary">Go Pro</a>
+            <a href="/search" className="pricing-btn pricing-btn-secondary">Buy Pro Pack</a>
           </div>
         </div>
 
-        <div className="revenue-callout">
+        <div style={{textAlign:'center',marginTop:'24px',fontSize:'13px',color:'var(--text-muted)'}}>
+          Not sure yet?&nbsp;
+          <a href="/search" style={{color:'var(--accent2)',textDecoration:'none',borderBottom:'1px solid rgba(129,140,248,0.4)'}}>
+            Start free — 3 CVs included, no credit card required.
+          </a>
+        </div>
+
+        <div className="revenue-callout" style={{marginTop:'40px'}}>
           <div className="revenue-callout-title">Market opportunity</div>
           <p>
             Estimated market: 200K+ active job seekers in Scandinavia &amp; Poland.
-            At 2% conversion on Starter plan: ~4,000 users × 49 kr =&nbsp;
-            <strong>196,000 kr/month revenue potential.</strong>
+            At 2% conversion on Growth Pack: ~4,000 purchases × 89 kr =&nbsp;
+            <strong>356,000 kr revenue potential.</strong>
           </p>
         </div>
       </section>
