@@ -16,7 +16,7 @@ services:
     restart: unless-stopped
     shm_size: '256m'              # Chromium needs > 64 MB /dev/shm
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/profile"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/profile',r=>process.exit(r.statusCode>=100&&r.statusCode<600?0:1)).on('error',()=>process.exit(1))"]
       interval: 30s
       timeout: 10s
       retries: 3
