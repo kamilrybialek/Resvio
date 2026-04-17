@@ -1,4 +1,17 @@
-export type JobSource = 'Arbetsförmedlingen' | 'The Hub' | 'LinkedIn' | 'Indeed' | 'Blocket' | 'JustJoinIT' | 'RocketJobs' | 'Other';
+export type JobSource =
+  | 'Arbetsförmedlingen'
+  | 'The Hub'
+  | 'LinkedIn'
+  | 'Indeed'
+  | 'Blocket'
+  | 'JustJoinIT'
+  | 'RocketJobs'
+  | 'Adzuna'
+  | 'Jooble'
+  | 'Reed'
+  | 'NoFluffJobs'
+  | 'Finn'
+  | 'Other';
 
 export interface Job {
   id: string;
@@ -24,4 +37,11 @@ export interface UserProfile {
   portfolioUrl?: string;
   skills: string[];
   appliedJobs?: string[]; // IDs of applied jobs
+  // ── Subscription ──────────────────────────────────────────────────────────
+  subscription?: {
+    plan: 'free' | 'starter' | 'growth' | 'pro';
+    cvCredits: number;          // remaining AI CV generations
+    expiresAt?: string;         // ISO date, undefined = never expires (credit-based)
+    activatedAt?: string;       // ISO date of purchase
+  };
 }

@@ -2,6 +2,9 @@ import React from 'react';
 import { Job } from '../../lib/types';
 import JobActions from './JobActions';
 
+/** Sources that rely on Playwright browser automation (local/NAS only). */
+const DEV_SOURCES = new Set(['LinkedIn', 'Indeed']);
+
 interface JobCardProps {
   job: Job;
   isApplied?: boolean;
@@ -65,15 +68,25 @@ function MatchRing({ score, scoring }: { score?: number; scoring: boolean }) {
 
 function SourceBadge({ source }: { source: string }) {
   const map: Record<string, { color: string; bg: string }> = {
-    LinkedIn:          { color: '#60a5fa', bg: 'rgba(96,165,250,0.1)' },
-    Indeed:            { color: '#fbbf24', bg: 'rgba(251,191,36,0.1)' },
-    JobTech:           { color: '#34d399', bg: 'rgba(52,211,153,0.1)' },
-    Arbetsförmedlingen:{ color: '#34d399', bg: 'rgba(52,211,153,0.1)' },
-    'The Hub':         { color: '#c084fc', bg: 'rgba(192,132,252,0.1)' },
+    LinkedIn:           { color: '#60a5fa', bg: 'rgba(96,165,250,0.1)' },
+    Indeed:             { color: '#fbbf24', bg: 'rgba(251,191,36,0.1)' },
+    JobTech:            { color: '#34d399', bg: 'rgba(52,211,153,0.1)' },
+    Arbetsförmedlingen: { color: '#34d399', bg: 'rgba(52,211,153,0.1)' },
+    'The Hub':          { color: '#c084fc', bg: 'rgba(192,132,252,0.1)' },
+    Adzuna:             { color: '#f97316', bg: 'rgba(249,115,22,0.1)' },
+    Jooble:             { color: '#38bdf8', bg: 'rgba(56,189,248,0.1)' },
+    Reed:               { color: '#f43f5e', bg: 'rgba(244,63,94,0.1)' },
+    NoFluffJobs:        { color: '#a78bfa', bg: 'rgba(167,139,250,0.1)' },
+    Finn:               { color: '#22d3ee', bg: 'rgba(34,211,238,0.1)' },
+    JustJoinIT:         { color: '#fb923c', bg: 'rgba(251,146,60,0.1)' },
+    RocketJobs:         { color: '#e879f9', bg: 'rgba(232,121,249,0.1)' },
   };
   const style = map[source] ?? { color: 'var(--text-secondary)', bg: 'var(--bg-overlay)' };
+  const isDev = DEV_SOURCES.has(source);
+
   return (
     <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: '4px',
       fontSize: '0.6rem', fontWeight: '700', padding: '2px 7px',
       borderRadius: 'var(--r-full)',
       color: style.color, background: style.bg,
@@ -81,6 +94,19 @@ function SourceBadge({ source }: { source: string }) {
       letterSpacing: '0.04em', textTransform: 'uppercase',
     }}>
       {source}
+      {isDev && (
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', gap: '2px',
+          fontSize: '0.55rem', fontWeight: '800',
+          color: '#f59e0b', background: 'rgba(245,158,11,0.15)',
+          padding: '1px 4px', borderRadius: 'var(--r-full)',
+          border: '1px solid rgba(245,158,11,0.3)',
+          letterSpacing: '0.06em',
+        }}>
+          <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#f59e0b', display: 'inline-block' }} />
+          DEV
+        </span>
+      )}
     </span>
   );
 }
@@ -102,6 +128,9 @@ export default function JobCard({ job, isApplied = false, onToggleApplied, isSco
         transition: 'opacity 0.2s ease',
         position: 'relative',
         overflow: 'hidden',
+        width: '100%',
+        minWidth: 0,
+        boxSizing: 'border-box',
       }}
     >
       {/* Left accent line on hover (handled via CSS class) */}

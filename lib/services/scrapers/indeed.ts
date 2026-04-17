@@ -58,7 +58,11 @@ export class IndeedScraper {
     const stealthPlugin = reqInstance('puppeteer-extra-plugin-stealth');
     playwright.chromium.use(stealthPlugin());
     
-    const browser = await playwright.chromium.launch({ headless: true });
+    const browser = await playwright.chromium.launch({
+      headless: true,
+      executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+    });
     
     try {
       const context = await browser.newContext({

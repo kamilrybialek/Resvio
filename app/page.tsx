@@ -195,18 +195,21 @@ export default function Home() {
         .sidebar-overlay { display: none; }
         @media (max-width: 900px) {
           .home-layout { overflow-x: hidden; }
-          .home-main   { margin-left: 0 !important; min-width: 0; overflow-x: hidden; }
+          .home-main   { margin-left: 0 !important; min-width: 0; max-width: 100vw; overflow-x: hidden; }
           .mobile-bar  { display: flex !important; }
           .sidebar-overlay { display: block !important; }
           .home-sidebar { transform: translateX(-100%); transition: transform 0.28s var(--ease-out); }
           .home-sidebar.open { transform: translateX(0); }
-          .stats-row { grid-template-columns: 1fr 1fr !important; }
+          .stats-row { grid-template-columns: repeat(3, 1fr) !important; }
           .jobs-grid { grid-template-columns: 1fr !important; }
+          .jobs-grid > * { min-width: 0; }
           .page-header { padding: 20px 16px 24px !important; }
           .results-area { padding: 20px 16px 48px !important; }
         }
         @media (max-width: 560px) {
-          .stats-row { grid-template-columns: 1fr 1fr !important; }
+          .stats-row { grid-template-columns: repeat(3, 1fr) !important; }
+          .stats-row .stat-card { padding: 10px 8px !important; gap: 8px !important; }
+          .stats-row .stat-icon { width: 30px !important; height: 30px !important; display: none !important; }
           .page-header-top { flex-direction: column !important; gap: 10px !important; margin-bottom: 20px !important; }
           .page-header-top h1 { font-size: var(--text-2xl) !important; }
           .search-wrap-card { padding: 16px !important; border-radius: var(--r-lg) !important; }
@@ -278,7 +281,7 @@ export default function Home() {
           )}
         </button>
         <span style={{ fontWeight: '800', fontSize: '1rem', letterSpacing: '-0.02em' }}>
-          Apply<span style={{ background: 'var(--gradient-brand)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>arr</span>
+          Res<span style={{ background: 'var(--gradient-brand)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>vio</span>
         </span>
       </div>
 
@@ -587,8 +590,6 @@ export default function Home() {
       <style>{`
         @media (max-width: 900px) {
           .home-main { padding-top: 56px !important; }
-          .home-main > div:first-child { padding: 24px 16px 20px !important; }
-          .home-main > div:last-child  { padding: 20px 16px 80px !important; }
         }
       `}</style>
     </>

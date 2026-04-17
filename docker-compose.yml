@@ -6,10 +6,10 @@ services:
     container_name: resvio
     ports:
       - "3000:3000"       # direct LAN access: http://192.168.1.249:3000
+    env_file:
+      - .env                        # loads all keys from .env automatically
     environment:
       - NODE_ENV=production
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       # VERCEL must NOT be set here — that would disable Playwright scrapers
     volumes:
       - resvio_data:/app/data   # persists profile.json across rebuilds
@@ -23,29 +23,19 @@ services:
       start_period: 40s
 
   # ── Cloudflare Tunnel ───────────────────────────────────────────────────────
-  # Exposes app.yourdomain.com → resvio:3000 without opening any firewall ports.
-  #
-  # SETUP (one-time):
-  #   1. Go to https://dash.cloudflare.com → Zero Trust → Networks → Tunnels
-  #   2. Create a tunnel, name it "resvio-nas"
-  #   3. Copy the tunnel token (starts with eyJ...)
-  #   4. Add it to .env:  CLOUDFLARE_TUNNEL_TOKEN=eyJ...
-  #   5. In Cloudflare Tunnel dashboard add a Public Hostname:
-  #        Subdomain: app   Domain: resvio.online
-  #        Service:   http://resvio:3000
-  #
+  # Exposes app.resvio.online → resvio:3000 without opening any firewall ports.
+  # Tunnel: resvio-nas (id: c9535677-a1ec-4f37-9674-38f47209d2dd)
+  # Public Hostname configured via Cloudflare API — no manual dashboard steps needed.
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: resvio-tunnel
     restart: unless-stopped
-    command: tunnel --no-autoupdate run
-    environment:
-      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN:-}
+    command: tunnel --no-autoupdate run --token eyJhIjoiY2I2YTc5YzI2ZTg4NzkzNDA0YjBlMDNkNzEwYWVlYTgiLCJ0IjoiYzk1MzU2NzctYTFlYy00ZjM3LTk2NzQtMzhmNDcyMDlkMmRkIiwicyI6IlpUUTBPVE00WkRZdE16bGlOUzAwWkRkakxXSmhOV0V0TWpSaVlUUTRabVV5TkdWaiJ9
     depends_on:
       resvio:
         condition: service_healthy
     profiles:
-      - tunnel   # only starts when COMPOSE_PROFILES=tunnel (see .env)
+      - tunnel   # only starts when COMPOSE_PROFILES=tunnel
 
 volumes:
   resvio_data:
