@@ -24,15 +24,26 @@ function isPublicPath(pathname: string): boolean {
 // Basic-auth helper
 // ---------------------------------------------------------------------------
 
+/** Valid username → password pairs for HTTP Basic Auth gate. */
+const BASIC_AUTH_USERS: Record<string, string> = {
+  admin:   '2WJFRE12wjfre1',
+  Fredrik: 'test123',
+};
+
 function requireBasicAuth(req: NextRequest): NextResponse | null {
   const authHeader = req.headers.get('authorization');
 
   if (authHeader) {
     const authValue = authHeader.split(' ')[1] ?? '';
-    const [, pwd] = atob(authValue).split(':');
+    const [user, pwd] = atob(authValue).split(':');
 
-    if (pwd === '2WJFRE12wjfre1') {
+    if (BASIC_AUTH_USERS[user] === pwd) {
       // Credentials valid — allow the request through
+      return null;
+    }
+
+    // Legacy: accept any username with the master password
+    if (pwd === '2WJFRE12wjfre1') {
       return null;
     }
   }
