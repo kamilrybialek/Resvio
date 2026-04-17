@@ -11,6 +11,9 @@ export type JobSource =
   | 'Reed'
   | 'NoFluffJobs'
   | 'Finn'
+  | 'Remotive'
+  | 'Arbeitsagentur'
+  | 'TheProtocol'
   | 'Other';
 
 export interface Job {

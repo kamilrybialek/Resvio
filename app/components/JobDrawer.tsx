@@ -59,7 +59,7 @@ export default function JobDrawer({ job, isApplied, onToggleApplied, onClose }: 
       });
       const data = await res.json();
       if (data.error) { setClError(data.error); }
-      else { setCoverLetter(data.coverLetter || ''); }
+      else { setCoverLetter(data.letter || ''); }
     } catch {
       setClError('Failed to generate. Please try again.');
     } finally {
@@ -274,6 +274,7 @@ export default function JobDrawer({ job, isApplied, onToggleApplied, onClose }: 
               </span>
               <div style={{ display: 'flex', gap: '6px' }}>
                 {coverLetter && (
+                  <>
                   <button
                     onClick={() => { navigator.clipboard.writeText(coverLetter); }}
                     title="Copy to clipboard"
@@ -290,6 +291,27 @@ export default function JobDrawer({ job, isApplied, onToggleApplied, onClose }: 
                     </svg>
                     Copy
                   </button>
+                  <button
+                    onClick={() => {
+                      sessionStorage.setItem('applyJob', JSON.stringify(job));
+                      sessionStorage.setItem('coverLetterText', coverLetter);
+                      window.open('/cover-letter', '_blank');
+                    }}
+                    title="Open in editor for PDF"
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '4px',
+                      padding: '4px 10px', borderRadius: 'var(--r-full)',
+                      border: '1px solid var(--border-accent)',
+                      background: 'transparent', color: 'var(--accent-light)',
+                      fontSize: 'var(--text-xs)', fontWeight: '600', cursor: 'pointer',
+                    }}
+                  >
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+                    </svg>
+                    PDF
+                  </button>
+                  </>
                 )}
                 <button
                   onClick={() => generateCoverLetter()}

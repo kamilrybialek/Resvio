@@ -15,7 +15,21 @@ export default function CoverLetterPage() {
   const [isGenerating, setIsGenerating]     = useState(false);
   const [error, setError]                   = useState('');
   const [copied, setCopied]                 = useState(false);
-  const letterRef = useRef<HTMLDivElement>(null);
+  const [candidateName, setCandidateName]   = useState('');
+  const [candidateEmail, setCandidateEmail] = useState('');
+  const [candidatePhone, setCandidatePhone] = useState('');
+
+  // Load profile info for PDF header
+  useEffect(() => {
+    fetch('/api/profile')
+      .then(r => r.json())
+      .then(p => {
+        if (p.name) setCandidateName(p.name);
+        if (p.email) setCandidateEmail(p.email);
+        if (p.phone) setCandidatePhone(p.phone);
+      })
+      .catch(() => {});
+  }, []);
 
   // Pre-fill from sessionStorage if coming from a job card
   useEffect(() => {
@@ -27,6 +41,12 @@ export default function CoverLetterPage() {
         setCompany(job.company || '');
         setJobDescription(job.description || '');
       } catch {}
+    }
+    // Pre-fill letter if coming from drawer
+    const pregenLetter = sessionStorage.getItem('coverLetterText');
+    if (pregenLetter) {
+      setLetter(pregenLetter);
+      sessionStorage.removeItem('coverLetterText');
     }
   }, []);
 
@@ -64,6 +84,7 @@ export default function CoverLetterPage() {
   };
 
   const printLetter = () => window.print();
+  const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
     <>
@@ -81,11 +102,59 @@ export default function CoverLetterPage() {
           .cl-grid { grid-template-columns: 1fr !important; }
         }
         @media print {
+          body, html { margin: 0; padding: 0; background: white; }
+          * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           .no-print { display: none !important; }
           .cl-main { margin-left: 0 !important; padding: 0 !important; background: white !important; }
-          .letter-body { box-shadow: none !important; border: none !important; max-width: 100% !important; }
+          .print-letter-root {
+            display: block !important;
+            position: fixed; inset: 0; background: white;
+            z-index: 9999;
+          }
+          .letter-preview-only { display: none !important; }
         }
       `}</style>
+
+      {/* ── PDF Print layout (only visible when printing) ── */}
+      {letter && (
+        <div className="print-letter-root" style={{ display: 'none' }}>
+          <div style={{
+            width: '210mm', minHeight: '297mm',
+            margin: '0 auto',
+            padding: '22mm 22mm 20mm',
+            fontFamily: '"Georgia", "Times New Roman", serif',
+            fontSize: '11pt', lineHeight: '1.75', color: '#111',
+            background: '#fff',
+            boxSizing: 'border-box',
+          }}>
+            {/* Sender block */}
+            {candidateName && (
+              <div style={{ marginBottom: '28pt', borderBottom: '1px solid #ccc', paddingBottom: '10pt' }}>
+                <div style={{ fontSize: '13pt', fontWeight: '700', letterSpacing: '-0.01em' }}>{candidateName}</div>
+                <div style={{ fontSize: '9.5pt', color: '#555', lineHeight: '1.7', marginTop: '3pt' }}>
+                  {[candidateEmail, candidatePhone].filter(Boolean).join('  ·  ')}
+                </div>
+              </div>
+            )}
+
+            {/* Date */}
+            <div style={{ fontSize: '10pt', color: '#666', marginBottom: '22pt' }}>{today}</div>
+
+            {/* Recipient block */}
+            {company && (
+              <div style={{ marginBottom: '22pt', lineHeight: '1.6' }}>
+                <div style={{ fontWeight: '600' }}>{company}</div>
+                {jobTitle && <div style={{ color: '#555', fontSize: '10pt' }}>Re: {jobTitle}</div>}
+              </div>
+            )}
+
+            {/* Letter body */}
+            <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.85' }}>
+              {letter}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mobile bar */}
       <div className="cl-mobile-bar no-print">
@@ -109,7 +178,7 @@ export default function CoverLetterPage() {
         <Sidebar />
       </div>
 
-      <main className="cl-main">
+      <main className="cl-main letter-preview-only">
         {/* Header */}
         <div className="no-print" style={{ padding: '40px 40px 32px', background: 'linear-gradient(180deg, var(--bg-surface) 0%, transparent 100%)', borderBottom: '1px solid var(--border-dim)', marginBottom: '32px' }}>
           <h1 style={{ fontSize: 'var(--text-3xl)', fontWeight: '900', letterSpacing: '-0.04em', color: 'var(--text-primary)', marginBottom: '8px' }}>
@@ -120,7 +189,7 @@ export default function CoverLetterPage() {
           </p>
         </div>
 
-        <div style={{ padding: '0 40px 80px', maxWidth: '900px' }}>
+        <div style={{ padding: '0 40px 80px', maxWidth: '960px' }}>
           <div className="cl-grid no-print" style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: '24px', alignItems: 'start' }}>
 
             {/* ── Left: inputs ── */}
@@ -214,16 +283,32 @@ export default function CoverLetterPage() {
                           : <><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</>
                         }
                       </button>
-                      <button onClick={printLetter} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 12px', borderRadius: 'var(--r-full)', border: '1px solid var(--border-default)', background: 'var(--bg-surface)', color: 'var(--text-secondary)', fontSize: 'var(--text-xs)', fontWeight: '600', cursor: 'pointer' }}>
+                      <button onClick={printLetter} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 14px', borderRadius: 'var(--r-full)', border: '1px solid var(--accent)', background: 'var(--accent)', color: '#fff', fontSize: 'var(--text-xs)', fontWeight: '700', cursor: 'pointer' }}>
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-                        Print
+                        Print / PDF
                       </button>
                     </div>
                   </div>
 
-                  {/* Letter body */}
-                  <div ref={letterRef} className="letter-body" style={{ padding: '28px 28px', fontSize: '0.9rem', lineHeight: '1.85', color: 'var(--text-primary)', whiteSpace: 'pre-wrap', fontFamily: '"Georgia", "Times New Roman", serif' }}>
-                    {letter}
+                  {/* Letter preview */}
+                  <div style={{ padding: '28px 32px', fontSize: '0.92rem', lineHeight: '1.85', color: 'var(--text-primary)', fontFamily: '"Georgia", "Times New Roman", serif' }}>
+                    {/* Preview sender block */}
+                    {candidateName && (
+                      <div style={{ marginBottom: '20px', paddingBottom: '12px', borderBottom: '1px solid var(--border-dim)' }}>
+                        <div style={{ fontWeight: '700', fontSize: '1rem' }}>{candidateName}</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', marginTop: '2px' }}>
+                          {[candidateEmail, candidatePhone].filter(Boolean).join('  ·  ')}
+                        </div>
+                      </div>
+                    )}
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', marginBottom: '16px' }}>{today}</div>
+                    {company && (
+                      <div style={{ marginBottom: '16px', lineHeight: '1.5', fontSize: '0.85rem' }}>
+                        <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{company}</div>
+                        {jobTitle && <div style={{ color: 'var(--text-secondary)' }}>Re: {jobTitle}</div>}
+                      </div>
+                    )}
+                    <div style={{ whiteSpace: 'pre-wrap' }}>{letter}</div>
                   </div>
 
                   {/* Word count */}
@@ -248,6 +333,8 @@ export default function CoverLetterPage() {
           </div>
         </div>
       </main>
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </>
   );
 }

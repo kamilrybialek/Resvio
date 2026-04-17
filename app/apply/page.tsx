@@ -155,12 +155,12 @@ function CvMinimal({ markdown }: { markdown: string }) {
     const roles = isRole ? parseRoles(section.lines) : [];
 
     return (
-      <div style={{ display: 'flex', borderTop: '1px solid #dedede', paddingTop: '14px', marginBottom: '14px' }}>
+      <div style={{ display: 'flex', borderTop: '1px solid #e0e0e0', paddingTop: '16px', marginBottom: '16px' }}>
         {/* Left: section label */}
-        <div style={{ width: '88px', flexShrink: 0, paddingRight: '10px', paddingTop: '1px' }}>
+        <div style={{ width: '100px', flexShrink: 0, paddingRight: '12px', paddingTop: '2px' }}>
           <span style={{
-            fontSize: '7.5pt', fontWeight: '700', letterSpacing: '0.1em',
-            textTransform: 'uppercase', color: '#333',
+            fontSize: '8pt', fontWeight: '700', letterSpacing: '0.08em',
+            textTransform: 'uppercase', color: '#444',
           }}>
             {section.title.replace('PROFESSIONAL ', '')}
           </span>
@@ -170,21 +170,21 @@ function CvMinimal({ markdown }: { markdown: string }) {
         <div style={{ flex: 1 }}>
           {isRole && roles.length > 0 ? (
             roles.map((role, ri) => (
-              <div key={ri} style={{ marginBottom: ri < roles.length - 1 ? '14px' : 0 }}>
+              <div key={ri} style={{ marginBottom: ri < roles.length - 1 ? '16px' : 0 }}>
                 {role.dates && (
-                  <div style={{ fontSize: '8.5pt', color: '#999', marginBottom: '3px' }}>{role.dates}</div>
+                  <div style={{ fontSize: '9pt', color: '#999', marginBottom: '3px' }}>{role.dates}</div>
                 )}
-                <div style={{ fontSize: '10.5pt', fontWeight: '700', color: '#1a1a1a', lineHeight: 1.2 }}>
+                <div style={{ fontSize: '11pt', fontWeight: '700', color: '#111', lineHeight: 1.25 }}>
                   {role.company || role.title}
                 </div>
                 {role.company && role.title && (
-                  <div style={{ fontSize: '9.5pt', color: '#666', fontStyle: 'italic', margin: '2px 0 5px' }}>
+                  <div style={{ fontSize: '10pt', color: '#666', fontStyle: 'italic', margin: '3px 0 6px' }}>
                     {role.title}{role.location ? ` · ${role.location}` : ''}
                   </div>
                 )}
                 {role.bullets.map((b, bi) => (
-                  <div key={bi} style={{ display: 'flex', gap: '7px', fontSize: '9.5pt', color: '#555', margin: '3px 0', alignItems: 'flex-start', lineHeight: '1.55' }}>
-                    <span style={{ flexShrink: 0, marginTop: '1px', color: '#aaa' }}>–</span>
+                  <div key={bi} style={{ display: 'flex', gap: '8px', fontSize: '10pt', color: '#444', margin: '4px 0', alignItems: 'flex-start', lineHeight: '1.6' }}>
+                    <span style={{ flexShrink: 0, marginTop: '1px', color: '#bbb' }}>–</span>
                     <span dangerouslySetInnerHTML={{ __html: inlineRender(b) }} />
                   </div>
                 ))}
@@ -197,22 +197,22 @@ function CvMinimal({ markdown }: { markdown: string }) {
               if (t.startsWith('### ')) {
                 const parts = t.slice(4).split('|').map(s => s.trim());
                 return (
-                  <div key={li} style={{ marginBottom: '10px' }}>
-                    <div style={{ fontSize: '10.5pt', fontWeight: '700', color: '#1a1a1a' }}>{parts[0]}</div>
-                    {parts[1] && <div style={{ fontSize: '9.5pt', color: '#666' }}>{parts[1]}{parts[2] ? ` · ${parts[2]}` : ''}</div>}
+                  <div key={li} style={{ marginBottom: '11px' }}>
+                    <div style={{ fontSize: '11pt', fontWeight: '700', color: '#111' }}>{parts[0]}</div>
+                    {parts[1] && <div style={{ fontSize: '10pt', color: '#666' }}>{parts[1]}{parts[2] ? ` · ${parts[2]}` : ''}</div>}
                   </div>
                 );
               }
               if (t.startsWith('- ') || t.startsWith('• ')) {
                 return (
-                  <div key={li} style={{ display: 'flex', gap: '7px', fontSize: '9.5pt', color: '#555', margin: '3px 0', alignItems: 'flex-start', lineHeight: '1.55' }}>
-                    <span style={{ flexShrink: 0, color: '#aaa' }}>–</span>
+                  <div key={li} style={{ display: 'flex', gap: '8px', fontSize: '10pt', color: '#444', margin: '4px 0', alignItems: 'flex-start', lineHeight: '1.6' }}>
+                    <span style={{ flexShrink: 0, color: '#bbb' }}>–</span>
                     <span dangerouslySetInnerHTML={{ __html: inlineRender(t.slice(2)) }} />
                   </div>
                 );
               }
               return (
-                <p key={li} style={{ fontSize: '9.5pt', color: '#555', margin: '0 0 4px', lineHeight: '1.6' }}
+                <p key={li} style={{ fontSize: '10pt', color: '#555', margin: '0 0 5px', lineHeight: '1.7' }}
                   dangerouslySetInnerHTML={{ __html: inlineRender(t) }} />
               );
             })
@@ -224,36 +224,36 @@ function CvMinimal({ markdown }: { markdown: string }) {
 
   return (
     <div id="cv-print-root" style={{
-      width: '210mm', minHeight: '297mm', maxHeight: '297mm',
-      background: '#ffffff', overflow: 'hidden',
+      width: '210mm', minHeight: '297mm',
+      background: '#ffffff',
       fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
-      color: '#1a1a1a', lineHeight: 1.45,
+      color: '#1a1a1a', lineHeight: 1.5,
       display: 'flex', flexDirection: 'column',
       boxShadow: '0 8px 60px rgba(0,0,0,0.18)',
     }}>
       {/* Header */}
-      <div style={{ padding: '14mm 16mm 10mm', flexShrink: 0 }}>
-        <h1 style={{ fontSize: '23pt', fontWeight: '800', margin: '0 0 5px', color: '#111', letterSpacing: '-0.02em', lineHeight: 1 }}>
+      <div style={{ padding: '14mm 18mm 12mm', flexShrink: 0 }}>
+        <h1 style={{ fontSize: '26pt', fontWeight: '800', margin: '0 0 6px', color: '#111', letterSpacing: '-0.02em', lineHeight: 1 }}>
           {cv.name}
         </h1>
         {cv.jobTitle && (
-          <p style={{ fontSize: '11pt', color: '#777', fontWeight: '400', margin: '0 0 9px' }}>{cv.jobTitle}</p>
+          <p style={{ fontSize: '12pt', color: '#777', fontWeight: '400', margin: '0 0 10px' }}>{cv.jobTitle}</p>
         )}
         {cv.contact.length > 0 && (
-          <div style={{ fontSize: '9.5pt', color: '#888', lineHeight: 1.7 }}>
-            {cv.contact.map((c, i) => <div key={i}>{c}</div>)}
+          <div style={{ fontSize: '10pt', color: '#888', lineHeight: 1.8 }}>
+            {cv.contact.join('  ·  ')}
           </div>
         )}
       </div>
 
       {/* Sections */}
-      <div style={{ flex: 1, padding: '0 16mm 8mm', overflow: 'hidden' }}>
+      <div style={{ flex: 1, padding: '0 18mm 10mm' }}>
         {cv.allSections.map((s, i) => <React.Fragment key={i}>{renderSection(s)}</React.Fragment>)}
       </div>
 
       {cv.gdpr && (
-        <div style={{ padding: '4mm 16mm 5mm', borderTop: '1px solid #e8e8e8', flexShrink: 0 }}>
-          <p style={{ fontSize: '7pt', color: '#bbb', fontStyle: 'italic', margin: 0 }}>{cv.gdpr}</p>
+        <div style={{ padding: '4mm 18mm 6mm', borderTop: '1px solid #ebebeb', flexShrink: 0 }}>
+          <p style={{ fontSize: '7.5pt', color: '#bbb', fontStyle: 'italic', margin: 0 }}>{cv.gdpr}</p>
         </div>
       )}
     </div>
@@ -271,10 +271,10 @@ function CvNordic({ markdown, photo }: { markdown: string; photo?: string }) {
 
   const SectionHeader = ({ title }: { title: string }) => (
     <div style={{
-      fontSize: '7.5pt', fontWeight: '700', letterSpacing: '0.14em',
+      fontSize: '8pt', fontWeight: '700', letterSpacing: '0.12em',
       textTransform: 'uppercase', color: '#222',
       borderBottom: '1.5px solid #222',
-      paddingBottom: '5px', marginBottom: '10px',
+      paddingBottom: '6px', marginBottom: '12px',
     }}>
       {title}
     </div>
@@ -282,28 +282,27 @@ function CvNordic({ markdown, photo }: { markdown: string; photo?: string }) {
 
   return (
     <div id="cv-print-root" style={{
-      width: '210mm', minHeight: '297mm', maxHeight: '297mm',
+      width: '210mm', minHeight: '297mm',
       display: 'flex', flexDirection: 'row',
       fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
       background: '#ffffff',
       boxShadow: '0 8px 60px rgba(0,0,0,0.18)',
-      overflow: 'hidden',
     }}>
       {/* ── LEFT SIDEBAR ── */}
       <div style={{
-        width: '60mm', flexShrink: 0,
+        width: '62mm', flexShrink: 0,
         display: 'flex', flexDirection: 'column', alignItems: 'center',
-        padding: '13mm 9mm 12mm',
-        background: '#f6f6f6',
-        borderRight: '1px solid #e8e8e8',
+        padding: '14mm 10mm 14mm',
+        background: '#f5f5f5',
+        borderRight: '1px solid #e4e4e4',
       }}>
         {/* Photo / avatar */}
         <div style={{
-          width: '90px', height: '110px',
-          background: '#d8d8d8',
-          marginBottom: '20px',
+          width: '96px', height: '116px',
+          background: '#d4d4d4',
+          marginBottom: '22px',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '22pt', fontWeight: '700', color: '#aaa',
+          fontSize: '22pt', fontWeight: '700', color: '#999',
           flexShrink: 0, overflow: 'hidden',
         }}>
           {photo
@@ -314,27 +313,27 @@ function CvNordic({ markdown, photo }: { markdown: string; photo?: string }) {
 
         {/* Skill / sidebar sections */}
         {cv.sidebarSections.map((section, si) => (
-          <div key={si} style={{ width: '100%', marginBottom: '18px' }}>
+          <div key={si} style={{ width: '100%', marginBottom: '20px' }}>
             <SectionHeader title={section.title} />
             {section.lines.map((line, li) => {
               const t = line.trim();
               if (!t) return null;
               if (t.startsWith('### ')) {
                 return (
-                  <p key={li} style={{ fontSize: '9.5pt', fontWeight: '600', color: '#333', margin: '8px 0 3px', textAlign: 'center' }}>
+                  <p key={li} style={{ fontSize: '10pt', fontWeight: '600', color: '#333', margin: '9px 0 4px', textAlign: 'center' }}>
                     {t.replace(/^###\s*/, '')}
                   </p>
                 );
               }
               if (t.startsWith('- ') || t.startsWith('• ')) {
                 return (
-                  <p key={li} style={{ fontSize: '9pt', color: '#555', margin: '4px 0', lineHeight: '1.45', textAlign: 'center' }}>
+                  <p key={li} style={{ fontSize: '9.5pt', color: '#555', margin: '5px 0', lineHeight: '1.5', textAlign: 'center' }}>
                     {t.replace(/^[-•]\s*/, '')}
                   </p>
                 );
               }
               return (
-                <p key={li} style={{ fontSize: '9pt', color: '#666', margin: '3px 0', lineHeight: '1.45', textAlign: 'center' }}
+                <p key={li} style={{ fontSize: '9.5pt', color: '#666', margin: '4px 0', lineHeight: '1.5', textAlign: 'center' }}
                   dangerouslySetInnerHTML={{ __html: inlineRender(t) }} />
               );
             })}
@@ -346,36 +345,36 @@ function CvNordic({ markdown, photo }: { markdown: string; photo?: string }) {
           <div style={{ width: '100%', marginTop: 'auto' }}>
             <SectionHeader title="Contact" />
             {cv.contact.map((c, i) => (
-              <p key={i} style={{ fontSize: '9pt', color: '#555', margin: '4px 0', wordBreak: 'break-all', textAlign: 'center', lineHeight: '1.45' }}>{c}</p>
+              <p key={i} style={{ fontSize: '9.5pt', color: '#555', margin: '5px 0', wordBreak: 'break-all', textAlign: 'center', lineHeight: '1.5' }}>{c}</p>
             ))}
           </div>
         )}
       </div>
 
       {/* ── RIGHT MAIN COLUMN ── */}
-      <div style={{ flex: 1, padding: '11mm 12mm 12mm 12mm', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
+      <div style={{ flex: 1, padding: '12mm 13mm 14mm 13mm', display: 'flex', flexDirection: 'column', position: 'relative' }}>
         {/* "CV" label — top right corner */}
         <div style={{
-          position: 'absolute', top: '9mm', right: '10mm',
+          position: 'absolute', top: '10mm', right: '11mm',
           background: '#111', color: '#fff',
           fontSize: '8pt', fontWeight: '700', letterSpacing: '0.12em',
-          padding: '4px 9px', flexShrink: 0,
+          padding: '4px 10px', flexShrink: 0,
         }}>
           CV
         </div>
 
         {/* Name block */}
-        <div style={{ marginBottom: '14px', paddingTop: '1mm' }}>
+        <div style={{ marginBottom: '16px', paddingTop: '2mm' }}>
           <h1 style={{
-            fontSize: '21pt', fontWeight: '800', color: '#111',
-            margin: '0 0 7px', letterSpacing: '0.04em',
+            fontSize: '22pt', fontWeight: '800', color: '#111',
+            margin: '0 0 8px', letterSpacing: '0.04em',
             textTransform: 'uppercase', lineHeight: 1,
           }}>
             {cv.name}
           </h1>
-          <div style={{ width: '36px', height: '2px', background: '#111', marginBottom: '10px' }} />
+          <div style={{ width: '40px', height: '2px', background: '#111', marginBottom: '10px' }} />
           {cv.jobTitle && (
-            <p style={{ fontSize: '10pt', color: '#666', margin: 0, lineHeight: 1.4 }}>{cv.jobTitle}</p>
+            <p style={{ fontSize: '11pt', color: '#666', margin: 0, lineHeight: 1.4 }}>{cv.jobTitle}</p>
           )}
         </div>
 
@@ -386,26 +385,26 @@ function CvNordic({ markdown, photo }: { markdown: string; photo?: string }) {
           const roles = isRole ? parseRoles(section.lines) : [];
 
           return (
-            <div key={si} style={{ marginBottom: '16px' }}>
+            <div key={si} style={{ marginBottom: '18px' }}>
               <SectionHeader title={section.title} />
 
               {isRole && roles.length > 0 ? (
                 roles.map((role, ri) => (
-                  <div key={ri} style={{ marginBottom: ri < roles.length - 1 ? '11px' : 0, display: 'flex', gap: '14px' }}>
+                  <div key={ri} style={{ marginBottom: ri < roles.length - 1 ? '13px' : 0, display: 'flex', gap: '14px' }}>
                     {role.dates && (
-                      <div style={{ fontSize: '8.5pt', color: '#999', flexShrink: 0, minWidth: '68px', lineHeight: 1.5, paddingTop: '1px' }}>
+                      <div style={{ fontSize: '9pt', color: '#999', flexShrink: 0, minWidth: '72px', lineHeight: 1.5, paddingTop: '2px' }}>
                         {role.dates.replace(/\s*[-–]\s*/, ' → ')}
                       </div>
                     )}
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '10pt', color: '#444', margin: '0 0 3px', lineHeight: 1.4 }}>
-                        {role.title && <span style={{ fontWeight: '600', color: '#111' }}>{role.title}</span>}
-                        {role.title && role.company && <span style={{ color: '#aaa', margin: '0 4px' }}>·</span>}
-                        {role.company && <span style={{ color: '#777' }}>{role.company}</span>}
+                      <div style={{ fontSize: '10.5pt', color: '#333', margin: '0 0 4px', lineHeight: 1.4 }}>
+                        {role.title && <span style={{ fontWeight: '700', color: '#111' }}>{role.title}</span>}
+                        {role.title && role.company && <span style={{ color: '#bbb', margin: '0 5px' }}>·</span>}
+                        {role.company && <span style={{ color: '#666' }}>{role.company}</span>}
                         {role.location && <span style={{ color: '#aaa' }}>, {role.location}</span>}
                       </div>
                       {role.bullets.map((b, bi) => (
-                        <p key={bi} style={{ fontSize: '9.5pt', color: '#666', margin: '3px 0', lineHeight: '1.55' }}
+                        <p key={bi} style={{ fontSize: '10pt', color: '#555', margin: '4px 0', lineHeight: '1.6' }}
                           dangerouslySetInnerHTML={{ __html: inlineRender(b) }} />
                       ))}
                     </div>
@@ -417,12 +416,12 @@ function CvNordic({ markdown, photo }: { markdown: string; photo?: string }) {
                   if (!t) return null;
                   if (t.startsWith('- ') || t.startsWith('• ')) {
                     return (
-                      <p key={li} style={{ fontSize: '9.5pt', color: '#666', margin: '3px 0', lineHeight: '1.55' }}
+                      <p key={li} style={{ fontSize: '10pt', color: '#555', margin: '4px 0', lineHeight: '1.6' }}
                         dangerouslySetInnerHTML={{ __html: inlineRender(t.slice(2)) }} />
                     );
                   }
                   return (
-                    <p key={li} style={{ fontSize: '9.5pt', color: '#555', margin: '0 0 5px', lineHeight: '1.65' }}
+                    <p key={li} style={{ fontSize: '10pt', color: '#444', margin: '0 0 6px', lineHeight: '1.7' }}
                       dangerouslySetInnerHTML={{ __html: inlineRender(t) }} />
                   );
                 })
@@ -432,8 +431,8 @@ function CvNordic({ markdown, photo }: { markdown: string; photo?: string }) {
         })}
 
         {cv.gdpr && (
-          <div style={{ marginTop: 'auto', borderTop: '1px solid #e8e8e8', paddingTop: '6px' }}>
-            <p style={{ fontSize: '7pt', color: '#bbb', fontStyle: 'italic', margin: 0 }}>{cv.gdpr}</p>
+          <div style={{ marginTop: 'auto', borderTop: '1px solid #e8e8e8', paddingTop: '7px' }}>
+            <p style={{ fontSize: '7.5pt', color: '#bbb', fontStyle: 'italic', margin: 0 }}>{cv.gdpr}</p>
           </div>
         )}
       </div>
@@ -475,10 +474,10 @@ function CvGrid({ markdown, photo }: { markdown: string; photo?: string }) {
 
   const GridSecHeader = ({ title, blue }: { title: string; blue?: boolean }) => (
     <div style={{
-      fontSize: '7.5pt', fontWeight: '700', letterSpacing: '0.14em',
+      fontSize: '8pt', fontWeight: '700', letterSpacing: '0.12em',
       textTransform: 'uppercase',
       color: blue ? '#2563eb' : '#222',
-      marginBottom: '11px',
+      marginBottom: '13px',
     }}>
       {title}
     </div>
@@ -514,9 +513,9 @@ function CvGrid({ markdown, photo }: { markdown: string; photo?: string }) {
       {/* ── ROW 2: Profile (photo | name + bio) ── */}
       <div style={{ display: 'flex', borderBottom: BORDER, flexShrink: 0 }}>
         {/* Photo */}
-        <div style={{ width: '50%', borderRight: BORDER, padding: '8mm', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '120px' }}>
+        <div style={{ width: '50%', borderRight: BORDER, padding: '9mm', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '130px' }}>
           <div style={{
-            width: '100px', height: '120px',
+            width: '105px', height: '125px',
             background: '#e4e4e4',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '22pt', fontWeight: '700', color: '#aaa',
@@ -529,18 +528,18 @@ function CvGrid({ markdown, photo }: { markdown: string; photo?: string }) {
           </div>
         </div>
         {/* Name + bio */}
-        <div style={{ flex: 1, padding: '8mm 8mm' }}>
+        <div style={{ flex: 1, padding: '9mm 9mm' }}>
           {cv.jobTitle && (
-            <p style={{ fontSize: '8.5pt', color: '#999', margin: '0 0 5px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            <p style={{ fontSize: '9pt', color: '#999', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               {cv.jobTitle}
             </p>
           )}
-          <div style={{ width: '38px', height: '1px', background: '#bbb', marginBottom: '8px' }} />
-          <h1 style={{ fontSize: '21pt', fontWeight: '800', color: '#111', margin: '0 0 10px', letterSpacing: '-0.01em', lineHeight: 1 }}>
+          <div style={{ width: '40px', height: '1px', background: '#bbb', marginBottom: '9px' }} />
+          <h1 style={{ fontSize: '22pt', fontWeight: '800', color: '#111', margin: '0 0 11px', letterSpacing: '-0.01em', lineHeight: 1 }}>
             {cv.name.toUpperCase()}
           </h1>
           {summary && (
-            <p style={{ fontSize: '9.5pt', color: '#666', margin: 0, lineHeight: '1.65' }}>
+            <p style={{ fontSize: '10pt', color: '#666', margin: 0, lineHeight: '1.7' }}>
               {summary.lines.filter(l => l.trim()).map(l => l.trim().replace(/^[-•]\s*/, '')).join(' ')}
             </p>
           )}
@@ -548,47 +547,47 @@ function CvGrid({ markdown, photo }: { markdown: string; photo?: string }) {
       </div>
 
       {/* ── ROW 3: Education | Experience ── */}
-      <div style={{ display: 'flex', borderBottom: BORDER, flex: 1, overflow: 'hidden' }}>
+      <div style={{ display: 'flex', borderBottom: BORDER, flex: 1 }}>
         {/* Education */}
-        <div style={{ width: '50%', borderRight: BORDER, padding: '7mm 8mm', overflow: 'hidden' }}>
+        <div style={{ width: '50%', borderRight: BORDER, padding: '8mm 9mm' }}>
           <GridSecHeader title="Education" />
           {eduRoles.length > 0 ? eduRoles.map((r, ri) => (
-            <div key={ri} style={{ marginBottom: '11px' }}>
-              {r.dates && <p style={{ fontSize: '8.5pt', color: '#999', margin: '0 0 2px' }}>{r.dates}</p>}
-              <p style={{ fontSize: '10pt', fontWeight: '600', color: '#111', margin: '0 0 1px', lineHeight: 1.3 }}>
+            <div key={ri} style={{ marginBottom: '13px' }}>
+              {r.dates && <p style={{ fontSize: '9pt', color: '#999', margin: '0 0 2px' }}>{r.dates}</p>}
+              <p style={{ fontSize: '10.5pt', fontWeight: '600', color: '#111', margin: '0 0 2px', lineHeight: 1.3 }}>
                 {r.title || r.company}
               </p>
-              {r.title && r.company && <p style={{ fontSize: '9.5pt', color: '#666', margin: '0 0 1px' }}>{r.company}</p>}
-              {r.location && <p style={{ fontSize: '9pt', color: '#999', margin: 0 }}>{r.location}</p>}
+              {r.title && r.company && <p style={{ fontSize: '10pt', color: '#666', margin: '0 0 1px' }}>{r.company}</p>}
+              {r.location && <p style={{ fontSize: '9.5pt', color: '#999', margin: 0 }}>{r.location}</p>}
             </div>
           )) : education?.lines.filter(l => l.trim()).map((line, li) => {
             const t = line.trim();
             if (t.startsWith('### ')) {
               const parts = t.slice(4).split('|').map(s => s.trim());
               return (
-                <div key={li} style={{ marginBottom: '10px' }}>
-                  <p style={{ fontSize: '10pt', fontWeight: '600', margin: '0 0 1px', lineHeight: 1.3 }}>{parts[0]}</p>
-                  {parts[1] && <p style={{ fontSize: '9.5pt', color: '#666', margin: 0 }}>{parts[1]}{parts[2] ? ` · ${parts[2]}` : ''}</p>}
+                <div key={li} style={{ marginBottom: '11px' }}>
+                  <p style={{ fontSize: '10.5pt', fontWeight: '600', margin: '0 0 2px', lineHeight: 1.3 }}>{parts[0]}</p>
+                  {parts[1] && <p style={{ fontSize: '10pt', color: '#666', margin: 0 }}>{parts[1]}{parts[2] ? ` · ${parts[2]}` : ''}</p>}
                 </div>
               );
             }
-            return <p key={li} style={{ fontSize: '9.5pt', color: '#666', margin: '3px 0' }} dangerouslySetInnerHTML={{ __html: inlineRender(t) }} />;
+            return <p key={li} style={{ fontSize: '10pt', color: '#666', margin: '4px 0' }} dangerouslySetInnerHTML={{ __html: inlineRender(t) }} />;
           })}
         </div>
 
         {/* Experience */}
-        <div style={{ flex: 1, padding: '7mm 8mm', overflow: 'hidden' }}>
+        <div style={{ flex: 1, padding: '8mm 9mm' }}>
           <GridSecHeader title="Experience" />
           {expRoles.map((role, ri) => (
-            <div key={ri} style={{ marginBottom: '11px' }}>
-              {role.dates && <p style={{ fontSize: '8.5pt', color: '#999', margin: '0 0 2px' }}>{role.dates}</p>}
-              <p style={{ fontSize: '10pt', color: '#333', margin: '0 0 3px', lineHeight: 1.3 }}>
+            <div key={ri} style={{ marginBottom: '13px' }}>
+              {role.dates && <p style={{ fontSize: '9pt', color: '#999', margin: '0 0 3px' }}>{role.dates}</p>}
+              <p style={{ fontSize: '10.5pt', color: '#333', margin: '0 0 4px', lineHeight: 1.3 }}>
                 {role.title && <span style={{ fontWeight: '700', color: '#111' }}>{role.title}</span>}
                 {role.title && role.company && <span style={{ color: '#ccc', margin: '0 5px' }}>/</span>}
                 {role.company && <span style={{ fontWeight: '500' }}>{role.company}</span>}
               </p>
               {role.bullets.map((b, bi) => (
-                <p key={bi} style={{ fontSize: '9.5pt', color: '#666', margin: '3px 0', lineHeight: '1.55' }}
+                <p key={bi} style={{ fontSize: '10pt', color: '#555', margin: '4px 0', lineHeight: '1.6' }}
                   dangerouslySetInnerHTML={{ __html: inlineRender(b) }} />
               ))}
             </div>
@@ -599,13 +598,13 @@ function CvGrid({ markdown, photo }: { markdown: string; photo?: string }) {
       {/* ── ROW 4: Skills (dots) | Professional | Social ── */}
       <div style={{ display: 'flex', borderBottom: BORDER, flexShrink: 0 }}>
         {/* Skills with dot ratings */}
-        <div style={{ width: '33.33%', borderRight: BORDER, padding: '6mm 8mm' }}>
+        <div style={{ width: '33.33%', borderRight: BORDER, padding: '7mm 9mm' }}>
           <GridSecHeader title="Skills" />
           {skillItems.slice(0, 7).map((skill, si) => {
             const dots = Math.max(5 - si, 2);
             return (
-              <div key={si} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '5px 0' }}>
-                <span style={{ fontSize: '9.5pt', color: '#444' }}>{skill}</span>
+              <div key={si} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '6px 0' }}>
+                <span style={{ fontSize: '10pt', color: '#444' }}>{skill}</span>
                 <div style={{ display: 'flex', gap: '3px', flexShrink: 0 }}>
                   {[1,2,3,4,5].map(d => (
                     <div key={d} style={{ width: '7px', height: '7px', borderRadius: '50%', background: d <= dots ? '#222' : '#ddd' }} />
@@ -617,18 +616,18 @@ function CvGrid({ markdown, photo }: { markdown: string; photo?: string }) {
         </div>
 
         {/* Professional skills */}
-        <div style={{ width: '33.33%', borderRight: BORDER, padding: '6mm 8mm' }}>
+        <div style={{ width: '33.33%', borderRight: BORDER, padding: '7mm 9mm' }}>
           <GridSecHeader title="Professional" blue />
           {skillItems.slice(0, 7).map((skill, si) => (
-            <p key={si} style={{ fontSize: '9.5pt', color: '#555', margin: '5px 0' }}>{skill}</p>
+            <p key={si} style={{ fontSize: '10pt', color: '#555', margin: '6px 0' }}>{skill}</p>
           ))}
         </div>
 
         {/* Social / soft skills */}
-        <div style={{ flex: 1, padding: '6mm 8mm' }}>
+        <div style={{ flex: 1, padding: '7mm 9mm' }}>
           <GridSecHeader title="Social" blue />
           {(softSkills.length > 0 ? softSkills : skillItems.slice(5)).slice(0, 7).map((skill, si) => (
-            <p key={si} style={{ fontSize: '9.5pt', color: '#555', margin: '5px 0' }}>{skill}</p>
+            <p key={si} style={{ fontSize: '10pt', color: '#555', margin: '6px 0' }}>{skill}</p>
           ))}
         </div>
       </div>

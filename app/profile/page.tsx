@@ -12,6 +12,7 @@ export default function ProfilePage() {
   const [saved, setSaved]           = useState(false);
   const [cvParseStep, setCvParseStep] = useState<0|1|2|3|4>(0);
   // 0=idle 1=uploading 2=reading 3=extracting 4=done
+  const [suggestedSkills, setSuggestedSkills] = useState<string[]>([]);
 
   useEffect(() => {
     fetch('/api/profile').then(r => r.json()).then(data => {
@@ -304,6 +305,50 @@ export default function ProfilePage() {
                   No skills added yet. Add at least 5–10 core skills to improve AI scoring accuracy.
                 </p>
               )}
+
+              {/* ── AI-suggested skills ── */}
+              {suggestedSkills.length > 0 && (
+                <div style={{ marginTop: '16px', padding: '14px 16px', background: 'var(--accent-dim)', border: '1px solid var(--border-accent)', borderRadius: 'var(--r-lg)' }}>
+                  <p style={{ fontSize: 'var(--text-xs)', fontWeight: '700', color: 'var(--accent-light)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
+                    AI suggestions · skills to consider adding
+                  </p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    {suggestedSkills.map((skill, i) => (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          if (!profile.skills.includes(skill)) {
+                            setProfile(p => ({ ...p, skills: [...p.skills, skill] }));
+                          }
+                          setSuggestedSkills(s => s.filter((_, j) => j !== i));
+                        }}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '5px',
+                          padding: '5px 12px',
+                          borderRadius: 'var(--r-full)',
+                          border: '1px dashed var(--border-accent)',
+                          background: 'transparent',
+                          color: 'var(--accent-light)',
+                          fontSize: 'var(--text-xs)',
+                          fontWeight: '600', cursor: 'pointer',
+                          transition: 'all var(--duration-fast) ease',
+                        }}
+                        onMouseEnter={e => { (e.target as HTMLElement).style.background = 'var(--accent)'; (e.target as HTMLElement).style.color = '#fff'; (e.target as HTMLElement).style.borderStyle = 'solid'; }}
+                        onMouseLeave={e => { (e.target as HTMLElement).style.background = 'transparent'; (e.target as HTMLElement).style.color = 'var(--accent-light)'; (e.target as HTMLElement).style.borderStyle = 'dashed'; }}
+                      >
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        {skill}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setSuggestedSkills([])}
+                      style={{ padding: '5px 10px', borderRadius: 'var(--r-full)', border: '1px solid transparent', background: 'transparent', color: 'var(--text-tertiary)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                </div>
+              )}
             </section>
 
             {/* ── Base CV card ── */}
@@ -465,8 +510,35 @@ export default function ProfilePage() {
                           setCvParseStep(3);
                           const data = await res.json();
                           if (data.text) {
-                            const updated = { ...profile, baseCv: data.text };
+                            // Auto-extract structured data (name, email, phone, skills…)
+                            let extracted: { name?: string; email?: string; phone?: string; linkedin?: string; portfolio?: string; skills?: string[]; suggestedSkills?: string[] } = {};
+                            try {
+                              const extRes = await fetch('/api/extract-cv-data', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ text: data.text }),
+                              });
+                              extracted = await extRes.json();
+                            } catch {}
+
+                            const updated = {
+                              ...profile,
+                              baseCv: data.text,
+                              // Auto-fill fields only if they're currently empty
+                              name:      profile.name      || extracted.name      || '',
+                              email:     profile.email     || extracted.email     || '',
+                              phone:     profile.phone     || extracted.phone     || '',
+                              portfolio: profile.portfolio || extracted.portfolio || extracted.linkedin || '',
+                              // Merge skills: keep existing + add extracted (deduplicated)
+                              skills: Array.from(new Set([
+                                ...profile.skills,
+                                ...(extracted.skills || []),
+                              ])).slice(0, 25),
+                            };
                             setProfile(updated);
+                            if (extracted.suggestedSkills?.length) {
+                              setSuggestedSkills(extracted.suggestedSkills);
+                            }
                             await fetch('/api/profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updated) });
                             setCvParseStep(4);
                             setSaved(true);

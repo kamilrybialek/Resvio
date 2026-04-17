@@ -11,6 +11,9 @@ import { JoobleService } from "./scrapers/jooble";
 import { ReedService } from "./scrapers/reed";
 import { NoFluffJobsScraper } from "./scrapers/nofluffjobs";
 import { FinnScraper } from "./scrapers/finn";
+import { RemotiveService } from "./scrapers/remotive";
+import { ArbeitsagenturService } from "./scrapers/arbeitsagentur";
+import { TheProtocolService } from "./scrapers/theprotocol";
 
 /**
  * Sources that use Playwright browser automation.
@@ -63,10 +66,29 @@ export class JobService {
           JustJoinITScraper.scrape(query, location, page, dateFilter).catch(() => []),
           RocketJobsScraper.scrape(query, location, page, dateFilter).catch(() => []),
           NoFluffJobsScraper.scrape(query, location, page, dateFilter).catch(() => []),
+          // TheProtocol.it — Polish tech jobs, no key required
+          TheProtocolService.search(query, location, page, dateFilter).catch(() => []),
           // Adzuna: covers DE, PL, AT, NL, FR, ES, IT, BE (requires keys)
           AdzunaService.search(query, location, page, dateFilter).catch(() => []),
           // Jooble: wide coverage (requires key)
           JoobleService.search(query, location, page, dateFilter).catch(() => []),
+        );
+      }
+
+      // ── German market (DACH) ──────────────────────────────────────────────
+      const isGermanMarket = (
+        location.toLowerCase().includes('germany') ||
+        location.toLowerCase().includes('deutschland') ||
+        location.toLowerCase().includes('berlin') ||
+        location.toLowerCase().includes('munich') ||
+        location.toLowerCase().includes('hamburg') ||
+        location.toLowerCase().includes('vienna') ||
+        location.toLowerCase().includes('zurich')
+      );
+      if (isGermanMarket || market === 'all_europe') {
+        promises.push(
+          // Bundesagentur für Arbeit — German federal job board, no key required
+          ArbeitsagenturService.search(query, location, page, dateFilter).catch(() => []),
         );
       }
 
@@ -118,6 +140,13 @@ export class JobService {
       if (remote && market !== 'central_europe' && market !== 'all_europe') {
         promises.push(
           JustJoinITScraper.scrape(query, 'Remote', page, dateFilter).catch(() => [])
+        );
+      }
+
+      // Remotive: always added for remote searches; also added for all_europe
+      if (remote || market === 'all_europe') {
+        promises.push(
+          RemotiveService.search(query, location, page, dateFilter).catch(() => [])
         );
       }
 
