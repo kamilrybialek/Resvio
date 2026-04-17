@@ -7,7 +7,10 @@ services:
     ports:
       - "3000:3000"       # direct LAN access: http://192.168.1.249:3000
     env_file:
-      - .env                        # loads all keys from .env automatically
+      - path: .env
+        required: false             # .env is optional — fall back to environment: block
+      - path: .env.local
+        required: false             # also load .env.local if present (dev keys)
     environment:
       - NODE_ENV=production
       # VERCEL must NOT be set here — that would disable Playwright scrapers
