@@ -766,6 +766,15 @@ export default function ApplyPage() {
   const [cvScale, setCvScale] = useState(1);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
+  // Cover letter state
+  const [coverLetter, setCoverLetter]         = useState('');
+  const [isGeneratingCL, setIsGeneratingCL]   = useState(false);
+  const [clError, setClError]                 = useState('');
+  const [clLanguage, setClLanguage]           = useState('English');
+  const [showCLSection, setShowCLSection]     = useState(false);
+  const [isDownloadingCL, setIsDownloadingCL] = useState(false);
+  const clPreviewRef = useRef<HTMLDivElement>(null);
+
   // Responsive CV scale
   useEffect(() => {
     const updateScale = () => {
@@ -821,6 +830,10 @@ export default function ApplyPage() {
       });
       const data = await res.json();
       setTailoredCv(data.error ? '# Error\n\n' + data.error : data.tailoredCv);
+      if (!data.error) {
+        setClLanguage(cvLanguage); // keep language in sync
+        setShowCLSection(true);   // suggest cover letter after CV
+      }
     } catch {
       setTailoredCv('# Error\n\nCould not connect to AI service.');
     }
@@ -853,6 +866,55 @@ export default function ApplyPage() {
       window.print();
     }
     setIsDownloadingPdf(false);
+  };
+
+  const generateCoverLetter = async () => {
+    if (!job) return;
+    setIsGeneratingCL(true);
+    setClError('');
+    setCoverLetter('');
+    try {
+      const res = await fetch('/api/generate-cover-letter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          job,
+          jobDescription: manualDesc || job.description,
+          targetLanguage: clLanguage,
+        }),
+      });
+      const data = await res.json();
+      if (data.error) setClError(data.error);
+      else setCoverLetter(data.letter || '');
+    } catch {
+      setClError('Could not connect to AI service.');
+    }
+    setIsGeneratingCL(false);
+  };
+
+  const downloadCoverLetterPdf = async () => {
+    if (!clPreviewRef.current) return;
+    setIsDownloadingCL(true);
+    try {
+      const html = clPreviewRef.current.innerHTML;
+      const res = await fetch('/api/cv-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ html, filename: `CoverLetter_${job?.company || 'Application'}.pdf` }),
+      });
+      if (res.ok && res.headers.get('content-type')?.includes('pdf')) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `CoverLetter_${job?.company || 'Application'}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        window.print();
+      }
+    } catch { window.print(); }
+    setIsDownloadingCL(false);
   };
 
   const scoreColor = analysis
@@ -1181,6 +1243,101 @@ export default function ApplyPage() {
             </div>
           )}
 
+          {/* ── Cover Letter Section (shown after CV generation) ── */}
+          {showCLSection && tailoredCv && (
+            <div style={{ animation: 'fadeInUp 0.4s var(--ease-out) both' }}>
+              <div style={{
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-dim)',
+                borderRadius: 'var(--r-xl)',
+                overflow: 'hidden',
+              }}>
+                {/* Section header */}
+                <div style={{
+                  padding: '18px 24px',
+                  borderBottom: '1px solid var(--border-dim)',
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px',
+                  background: 'linear-gradient(90deg, var(--bg-elevated), var(--bg-surface))',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: 'var(--r-md)', background: 'var(--accent-dim)', border: '1px solid var(--border-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 style={{ fontSize: 'var(--text-base)', fontWeight: '800', color: 'var(--text-primary)', margin: 0 }}>Cover Letter</h3>
+                      <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', margin: 0 }}>Complete your application with a tailored cover letter</p>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    {/* Language selector */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                      <select value={clLanguage} onChange={e => setClLanguage(e.target.value)}
+                        style={{ padding: '5px 8px', borderRadius: 'var(--r-sm)', background: 'var(--bg-surface)', color: 'var(--text-primary)', border: '1px solid var(--border-default)', fontSize: 'var(--text-xs)', fontFamily: 'var(--font-sans)', cursor: 'pointer', outline: 'none' }}>
+                        {['English','Swedish','Norwegian','Danish','German','Polish','French','Spanish','Dutch'].map(l => <option key={l}>{l}</option>)}
+                      </select>
+                    </div>
+                    {coverLetter && (
+                      <button onClick={downloadCoverLetterPdf} disabled={isDownloadingCL}
+                        className="btn btn-ghost" style={{ padding: '6px 14px', fontSize: 'var(--text-xs)', opacity: isDownloadingCL ? 0.7 : 1 }}>
+                        {isDownloadingCL
+                          ? <span style={{ width: '11px', height: '11px', border: '2px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.6s linear infinite' }} />
+                          : <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        }
+                        <span>Download PDF</span>
+                      </button>
+                    )}
+                    <button onClick={generateCoverLetter} disabled={isGeneratingCL}
+                      className="btn btn-primary" style={{ padding: '6px 18px', fontSize: 'var(--text-xs)', fontWeight: '800', opacity: isGeneratingCL ? 0.7 : 1 }}>
+                      {isGeneratingCL
+                        ? <><div style={{ width: '11px', height: '11px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />Writing…</>
+                        : <><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>{coverLetter ? 'Regenerate' : 'Generate Cover Letter'}</>
+                      }
+                    </button>
+                  </div>
+                </div>
+
+                {/* Letter output */}
+                <div style={{ padding: '24px' }}>
+                  {clError && (
+                    <div style={{ padding: '12px 16px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 'var(--r-md)', fontSize: 'var(--text-sm)', color: '#f87171', marginBottom: '16px' }}>
+                      {clError}
+                    </div>
+                  )}
+                  {isGeneratingCL && !coverLetter && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-tertiary)', padding: '20px 0' }}>
+                      <span style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid var(--accent)', borderTopColor: 'transparent', animation: 'spin 0.7s linear infinite', display: 'inline-block', flexShrink: 0 }} />
+                      Writing your cover letter…
+                    </div>
+                  )}
+                  {coverLetter ? (
+                    /* Print-ready letter preview */
+                    <div ref={clPreviewRef}>
+                      <div style={{
+                        fontFamily: '"Georgia", "Times New Roman", serif',
+                        fontSize: '11pt', lineHeight: '1.85', color: '#111',
+                        background: '#fff',
+                        padding: '24px 28px',
+                        border: '1px solid var(--border-dim)',
+                        borderRadius: 'var(--r-lg)',
+                        maxWidth: '680px',
+                        margin: '0 auto',
+                      }}>
+                        <div style={{ whiteSpace: 'pre-wrap' }}>{coverLetter}</div>
+                      </div>
+                    </div>
+                  ) : !isGeneratingCL && (
+                    <div style={{ textAlign: 'center', padding: '32px', color: 'var(--text-tertiary)', fontSize: 'var(--text-sm)' }}>
+                      Click <strong>Generate Cover Letter</strong> to create a personalised letter based on your CV and this job.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ── Final CTA ── */}
           {tailoredCv && (
             <div style={{
@@ -1197,7 +1354,7 @@ export default function ApplyPage() {
         </div>
       </div>
 
-      {/* ── Print-only container ── */}
+      {/* ── Print-only CV container ── */}
       <div className="print-cv-container" style={{ display: 'none' }}>
         {tailoredCv && <CvPreview markdown={tailoredCv} templateId={selectedTemplate} photo={profilePhoto || undefined} />}
       </div>

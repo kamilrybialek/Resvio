@@ -15,9 +15,11 @@ export default function CoverLetterPage() {
   const [isGenerating, setIsGenerating]     = useState(false);
   const [error, setError]                   = useState('');
   const [copied, setCopied]                 = useState(false);
+  const [isDownloading, setIsDownloading]   = useState(false);
   const [candidateName, setCandidateName]   = useState('');
   const [candidateEmail, setCandidateEmail] = useState('');
   const [candidatePhone, setCandidatePhone] = useState('');
+  const letterPrintRef = useRef<HTMLDivElement>(null);
 
   // Load profile info for PDF header
   useEffect(() => {
@@ -83,7 +85,30 @@ export default function CoverLetterPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const printLetter = () => window.print();
+  const downloadPdf = async () => {
+    if (!letterPrintRef.current) return;
+    setIsDownloading(true);
+    try {
+      const html = letterPrintRef.current.innerHTML;
+      const res = await fetch('/api/cv-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ html, filename: `CoverLetter_${company || 'Application'}.pdf` }),
+      });
+      if (res.ok && res.headers.get('content-type')?.includes('pdf')) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `CoverLetter_${company || 'Application'}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        window.print();
+      }
+    } catch { window.print(); }
+    setIsDownloading(false);
+  };
   const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
@@ -283,15 +308,18 @@ export default function CoverLetterPage() {
                           : <><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</>
                         }
                       </button>
-                      <button onClick={printLetter} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 14px', borderRadius: 'var(--r-full)', border: '1px solid var(--accent)', background: 'var(--accent)', color: '#fff', fontSize: 'var(--text-xs)', fontWeight: '700', cursor: 'pointer' }}>
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-                        Print / PDF
+                      <button onClick={downloadPdf} disabled={isDownloading} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 14px', borderRadius: 'var(--r-full)', border: '1px solid var(--accent)', background: 'var(--accent)', color: '#fff', fontSize: 'var(--text-xs)', fontWeight: '700', cursor: 'pointer', opacity: isDownloading ? 0.7 : 1 }}>
+                        {isDownloading
+                          ? <span style={{ width: '11px', height: '11px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.6s linear infinite', display: 'inline-block' }} />
+                          : <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        }
+                        {isDownloading ? 'Generating…' : 'Download PDF'}
                       </button>
                     </div>
                   </div>
 
                   {/* Letter preview */}
-                  <div style={{ padding: '28px 32px', fontSize: '0.92rem', lineHeight: '1.85', color: 'var(--text-primary)', fontFamily: '"Georgia", "Times New Roman", serif' }}>
+                  <div ref={letterPrintRef} style={{ padding: '28px 32px', fontSize: '0.92rem', lineHeight: '1.85', color: 'var(--text-primary)', fontFamily: '"Georgia", "Times New Roman", serif' }}>
                     {/* Preview sender block */}
                     {candidateName && (
                       <div style={{ marginBottom: '20px', paddingBottom: '12px', borderBottom: '1px solid var(--border-dim)' }}>

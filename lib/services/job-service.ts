@@ -15,6 +15,54 @@ import { RemotiveService } from "./scrapers/remotive";
 import { ArbeitsagenturService } from "./scrapers/arbeitsagentur";
 import { TheProtocolService } from "./scrapers/theprotocol";
 
+// Country/city synonym map — expands a search term to related terms
+const LOCATION_SYNONYMS: Record<string, string[]> = {
+  sweden:      ['sweden', 'sverige', 'stockholm', 'göteborg', 'gothenburg', 'malmö', 'malmo', 'uppsala', 'se'],
+  stockholm:   ['stockholm', 'sweden', 'sverige'],
+  göteborg:    ['göteborg', 'gothenburg', 'sweden', 'sverige'],
+  gothenburg:  ['göteborg', 'gothenburg', 'sweden', 'sverige'],
+  malmö:       ['malmö', 'malmo', 'sweden', 'sverige'],
+  norway:      ['norway', 'norge', 'oslo', 'bergen', 'trondheim', 'no'],
+  oslo:        ['oslo', 'norway', 'norge'],
+  bergen:      ['bergen', 'norway', 'norge'],
+  denmark:     ['denmark', 'danmark', 'copenhagen', 'københavn', 'aarhus', 'dk'],
+  copenhagen:  ['copenhagen', 'københavn', 'denmark', 'danmark'],
+  københavn:   ['copenhagen', 'københavn', 'denmark', 'danmark'],
+  finland:     ['finland', 'suomi', 'helsinki', 'fi'],
+  helsinki:    ['helsinki', 'finland', 'suomi'],
+  poland:      ['poland', 'polska', 'warsaw', 'warszawa', 'krakow', 'kraków', 'wrocław', 'wroclaw', 'pl'],
+  warsaw:      ['warsaw', 'warszawa', 'poland', 'polska'],
+  warszawa:    ['warsaw', 'warszawa', 'poland', 'polska'],
+  germany:     ['germany', 'deutschland', 'berlin', 'munich', 'münchen', 'hamburg', 'de'],
+  berlin:      ['berlin', 'germany', 'deutschland'],
+  munich:      ['munich', 'münchen', 'germany', 'deutschland'],
+  uk:          ['uk', 'united kingdom', 'england', 'london', 'manchester', 'birmingham', 'gb'],
+  london:      ['london', 'uk', 'united kingdom', 'england'],
+  netherlands: ['netherlands', 'nederland', 'amsterdam', 'rotterdam', 'nl'],
+  amsterdam:   ['amsterdam', 'netherlands', 'nederland'],
+};
+
+/**
+ * Returns true if a job's location string is relevant to the searched location.
+ * Checks direct substring match first, then synonym expansion.
+ */
+function locationMatches(jobLoc: string, searchLoc: string): boolean {
+  const search = searchLoc.toLowerCase().trim();
+  if (!search) return true;
+
+  // Direct substring match
+  if (jobLoc.includes(search)) return true;
+
+  // Token-level: each word in search must appear in jobLoc or synonyms
+  const searchTokens = search.split(/[\s,]+/).filter(Boolean);
+  for (const token of searchTokens) {
+    if (jobLoc.includes(token)) return true;
+    const synonyms = LOCATION_SYNONYMS[token] ?? [];
+    if (synonyms.some(s => jobLoc.includes(s))) return true;
+  }
+  return false;
+}
+
 /**
  * Sources that use Playwright browser automation.
  * These only work locally / on NAS — not on Vercel.
@@ -153,9 +201,21 @@ export class JobService {
       const results = await Promise.all(promises);
       const allJobs = results.flat();
 
+      // ── Location relevance filter ─────────────────────────────────────────
+      // Keep a job if: it's remote, OR its location matches the searched city/country.
+      const locationFiltered = remote ? allJobs : allJobs.filter(job => {
+        const jobLoc = job.location.toLowerCase();
+        // Always keep remote-tagged jobs regardless of search location
+        const isJobRemote = ['remote', 'distans', 'hybrid', 'zdalne', 'flexible', 'anywhere']
+          .some(r => jobLoc.includes(r));
+        if (isJobRemote) return true;
+        // Check if job location overlaps with searched location
+        return locationMatches(jobLoc, location);
+      });
+
       // Deduplicate by title+company (case-insensitive)
       const seen = new Set<string>();
-      return allJobs.filter(job => {
+      return locationFiltered.filter(job => {
         const key = `${job.title.toLowerCase().trim()}|${job.company.toLowerCase().trim()}`;
         if (seen.has(key)) return false;
         seen.add(key);
