@@ -149,8 +149,13 @@ export default function Sidebar({ market = 'scandinavia', onMarketChange }: Side
 
       {/* ── Bottom divider + version ── */}
       <div style={{ padding: '12px 20px 20px', borderTop: '1px solid var(--border-dim)' }}>
-        <p style={{ fontSize: '0.62rem', color: 'var(--text-tertiary)', textAlign: 'center' }}>
+        <p style={{ fontSize: '0.62rem', color: 'var(--text-tertiary)', textAlign: 'center', lineHeight: '1.7' }}>
           Resvio · AI-powered job search
+        </p>
+        <p style={{ fontSize: '0.58rem', color: 'var(--text-tertiary)', textAlign: 'center', opacity: 0.6, fontFamily: 'monospace', marginTop: '2px' }}>
+          v{process.env.NEXT_PUBLIC_APP_VERSION}
+          {process.env.NEXT_PUBLIC_GIT_HASH ? ` · ${process.env.NEXT_PUBLIC_GIT_HASH}` : ''}
+          {process.env.NEXT_PUBLIC_BUILD_DATE ? ` · ${process.env.NEXT_PUBLIC_BUILD_DATE}` : ''}
         </p>
       </div>
     </aside>
