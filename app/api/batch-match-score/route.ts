@@ -1,109 +1,113 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ProfileService } from '@/lib/services/profile-service';
 import { Job } from '@/lib/types';
-import OpenAI from 'openai';
-import Anthropic from '@anthropic-ai/sdk';
 
-const MAX_JOBS = 15;
+const MAX_JOBS = 50;
 
-// ── Premium gate ────────────────────────────────────────────────────────────
-// Set to true when payment integration is live to restrict AI scoring to
-// paid subscribers. Until then, scoring is available to all users.
-const AI_SCORING_PREMIUM_ONLY = false;
+/**
+ * Keyword-based match scoring — no AI, instant, runs on server.
+ *
+ * Algorithm (0–100):
+ *  30 pts  Skill overlap (candidate skills found in job text)
+ *  25 pts  CV keyword overlap (words from CV body found in job text)
+ *  20 pts  Title relevance (job title words found in CV)
+ *  15 pts  Seniority alignment
+ *  10 pts  Location match (bonus for remote / same city)
+ */
+function scoreJob(job: Job, skills: string[], cvWords: Set<string>, cvText: string): number {
+  const jobText = (job.title + ' ' + job.description + ' ' + job.company).toLowerCase();
+  const jobWords = new Set(jobText.split(/[\s,;()\-/]+/).filter(w => w.length > 3));
+
+  // 1. Skill overlap (30 pts)
+  let skillHits = 0;
+  for (const skill of skills) {
+    const s = skill.toLowerCase();
+    if (jobText.includes(s)) skillHits++;
+  }
+  const skillScore = skills.length > 0
+    ? Math.min(30, Math.round((skillHits / skills.length) * 30 + (skillHits > 0 ? 5 : 0)))
+    : 0;
+
+  // 2. CV keyword overlap (25 pts) — how many distinct job keywords appear in CV
+  const jobKeywords = Array.from(jobWords).filter(w => w.length > 4);
+  let cvHits = 0;
+  for (const kw of jobKeywords) {
+    if (cvWords.has(kw)) cvHits++;
+  }
+  const cvScore = jobKeywords.length > 0
+    ? Math.min(25, Math.round((cvHits / Math.max(jobKeywords.length, 1)) * 50))
+    : 0;
+
+  // 3. Title word match (20 pts)
+  const titleWords = job.title.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+  let titleHits = 0;
+  for (const tw of titleWords) {
+    if (cvText.toLowerCase().includes(tw)) titleHits++;
+  }
+  const titleScore = titleWords.length > 0
+    ? Math.min(20, Math.round((titleHits / titleWords.length) * 20))
+    : 0;
+
+  // 4. Seniority alignment (15 pts)
+  const seniorTerms = ['senior', 'lead', 'principal', 'staff', 'architect', 'manager', 'head', 'director'];
+  const juniorTerms = ['junior', 'entry', 'graduate', 'trainee', 'intern'];
+  const midTerms    = ['mid', 'intermediate', 'medior'];
+
+  const jobSenior = seniorTerms.some(t => jobText.includes(t));
+  const jobJunior = juniorTerms.some(t => jobText.includes(t));
+  const jobMid    = midTerms.some(t => jobText.includes(t));
+
+  const cvSenior  = seniorTerms.some(t => cvText.toLowerCase().includes(t));
+  const cvJunior  = juniorTerms.some(t => cvText.toLowerCase().includes(t));
+  const cvMid     = midTerms.some(t => cvText.toLowerCase().includes(t));
+
+  let seniorityScore = 10; // neutral
+  if (jobSenior && cvSenior) seniorityScore = 15;
+  if (jobJunior && cvJunior) seniorityScore = 15;
+  if (jobMid    && cvMid)    seniorityScore = 15;
+  if (jobSenior && cvJunior) seniorityScore = 3;  // overqualified mismatch
+  if (jobJunior && cvSenior) seniorityScore = 5;  // underqualified mismatch
+
+  // 5. Location / remote bonus (10 pts)
+  const jobLoc = job.location.toLowerCase();
+  const isRemote = jobLoc.includes('remote') || jobLoc.includes('distans') || jobLoc.includes('zdalne');
+  const locationScore = isRemote ? 10 : 6; // remote = always accessible
+
+  const total = skillScore + cvScore + titleScore + seniorityScore + locationScore;
+  return Math.min(100, Math.max(1, total));
+}
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const jobs: Job[] = Array.isArray(body.jobs) ? body.jobs.slice(0, MAX_JOBS) : [];
 
-    // Premium gate (activate when subscriptions go live)
-    if (AI_SCORING_PREMIUM_ONLY) {
-      const profile = ProfileService.getProfile();
-      const plan = profile?.subscription?.plan ?? 'free';
-      if (plan === 'free') {
-        return NextResponse.json({
-          scores: {},
-          error: 'premium_required',
-          message: 'AI match scoring requires a paid plan. Upgrade to Growth or Pro.',
-        }, { status: 403 });
-      }
-    }
-
     if (jobs.length === 0) {
       return NextResponse.json({ scores: {} });
     }
 
     const profile = ProfileService.getProfile();
-    const baseCv = (profile?.baseCv || profile?.baseCvPath || '').trim();
-    const skills = Array.isArray(profile?.skills) && profile.skills.length > 0
-      ? profile.skills.join(', ')
-      : '';
+    const cvText  = (profile?.baseCv || profile?.baseCvPath || '').trim();
+    const skills  = Array.isArray(profile?.skills) && profile.skills.length > 0
+      ? profile.skills
+      : [];
 
     // Need at least a CV or skill list to score
-    if (!baseCv && !skills) {
+    if (!cvText && skills.length === 0) {
       return NextResponse.json({ scores: {} });
     }
 
-    // Use CV excerpt (skills + recent experience) — full CV wastes tokens in batch mode
-    const cvExcerpt = baseCv ? baseCv.slice(0, 2500) : `Skills: ${skills}`;
+    // Pre-tokenize CV for fast lookups
+    const cvWords = new Set(
+      cvText.toLowerCase().split(/[\s,;()\-/]+/).filter(w => w.length > 4)
+    );
 
-    const jobListText = jobs
-      .map(j => `[${j.id}] ${j.title} @ ${j.company}${j.location ? ` (${j.location})` : ''}: ${(j.description || j.title).slice(0, 250)}`)
-      .join('\n');
-
-    const systemPrompt = 'You are a recruiter. Score CV-job matches. Output ONLY valid JSON, no markdown.';
-    const userPrompt = `Score each job for this candidate (0-100). Criteria: skills match, seniority fit, industry relevance, location fit.
-
-CANDIDATE:
-${cvExcerpt}
-
-JOBS:
-${jobListText}
-
-Return JSON: {"job-id": score, ...}`;
-
-    let scores: Record<string, number> = {};
-
-    if (process.env.OPENAI_API_KEY) {
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        response_format: { type: 'json_object' },
-        max_tokens: 400,
-        temperature: 0,
-      });
-      const raw = response.choices[0].message.content || '{}';
-      scores = JSON.parse(raw);
-    } else if (process.env.ANTHROPIC_API_KEY) {
-      const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-      const response = await anthropic.messages.create({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 400,
-        temperature: 0,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }],
-      });
-      const raw = (response.content[0] as { type: string; text: string }).text || '{}';
-      scores = JSON.parse(raw);
-    } else {
-      // No AI key available — return empty so UI keeps random scores
-      return NextResponse.json({ scores: {} });
+    const scores: Record<string, number> = {};
+    for (const job of jobs) {
+      scores[job.id] = scoreJob(job, skills, cvWords, cvText);
     }
 
-    // Sanitize: ensure all values are numbers in [0, 100]
-    const sanitized: Record<string, number> = {};
-    for (const [id, val] of Object.entries(scores)) {
-      const n = Number(val);
-      if (!isNaN(n)) {
-        sanitized[id] = Math.min(100, Math.max(0, Math.round(n)));
-      }
-    }
-
-    return NextResponse.json({ scores: sanitized });
+    return NextResponse.json({ scores });
   } catch (err) {
     console.error('[batch-match-score] error:', err);
     return NextResponse.json({ scores: {} });
