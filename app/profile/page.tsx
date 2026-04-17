@@ -9,6 +9,8 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving]     = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [saved, setSaved]           = useState(false);
+  const [cvParseStep, setCvParseStep] = useState<0|1|2|3|4>(0);
+  // 0=idle 1=uploading 2=reading 3=extracting 4=done
 
   useEffect(() => {
     fetch('/api/profile').then(r => r.json()).then(data => {
@@ -112,7 +114,7 @@ export default function ProfilePage() {
           }
         </button>
         <span style={{ fontWeight: '800', fontSize: '1rem', letterSpacing: '-0.02em' }}>
-          Apply<span style={{ background: 'var(--gradient-brand)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>arr</span>
+          Res<span style={{ background: 'var(--gradient-brand)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>vio</span>
         </span>
       </div>
 
@@ -258,11 +260,112 @@ export default function ProfilePage() {
             {/* ── Base CV card ── */}
             <section style={{
               background: 'var(--bg-elevated)',
-              border: '1px solid var(--border-default)',
+              border: cvParseStep > 0 ? '1px solid var(--border-accent)' : '1px solid var(--border-default)',
               borderRadius: 'var(--r-xl)',
               padding: '28px',
               marginBottom: '20px',
+              position: 'relative',
+              transition: 'border-color 0.3s ease',
             }}>
+
+              {/* ── CV Parse Progress Overlay ── */}
+              {cvParseStep > 0 && (
+                <div style={{
+                  position: 'absolute', inset: 0, zIndex: 10,
+                  background: 'rgba(var(--bg-elevated-rgb, 255,255,255), 0.92)',
+                  backdropFilter: 'blur(8px)',
+                  borderRadius: 'var(--r-xl)',
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center',
+                  gap: '24px', padding: '32px',
+                }}>
+                  <style>{`
+                    @keyframes cvSpinRing {
+                      to { stroke-dashoffset: 0; }
+                    }
+                    @keyframes cvStepIn {
+                      from { opacity: 0; transform: translateY(6px); }
+                      to   { opacity: 1; transform: translateY(0); }
+                    }
+                    @keyframes cvPulseGlow {
+                      0%,100% { box-shadow: 0 0 0 0 rgba(99,102,241,0.4); }
+                      50%     { box-shadow: 0 0 0 10px rgba(99,102,241,0); }
+                    }
+                    .cv-step-row { display: flex; align-items: center; gap: 12px; animation: cvStepIn 0.3s var(--ease-out) both; }
+                    .cv-step-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+                    .cv-step-icon.done { background: rgba(16,185,129,0.15); border: 1.5px solid rgba(16,185,129,0.4); }
+                    .cv-step-icon.active { background: var(--accent-dim); border: 1.5px solid var(--border-accent); animation: cvPulseGlow 1.4s ease infinite; }
+                    .cv-step-icon.pending { background: var(--bg-overlay); border: 1.5px solid var(--border-dim); }
+                  `}</style>
+
+                  {/* Spinning ring */}
+                  <div style={{ position: 'relative', width: '72px', height: '72px' }}>
+                    <svg width="72" height="72" viewBox="0 0 72 72" style={{ transform: 'rotate(-90deg)' }}>
+                      <circle cx="36" cy="36" r="30" fill="none" stroke="var(--border-dim)" strokeWidth="4" />
+                      <circle
+                        cx="36" cy="36" r="30" fill="none"
+                        stroke="var(--accent)"
+                        strokeWidth="4"
+                        strokeLinecap="round"
+                        strokeDasharray={`${(cvParseStep / 4) * 188.5} 188.5`}
+                        style={{ transition: 'stroke-dasharray 0.6s var(--ease-out)' }}
+                      />
+                    </svg>
+                    <div style={{
+                      position: 'absolute', inset: 0, display: 'flex',
+                      alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      {cvParseStep === 4 ? (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--match-high)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                      ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Steps */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', maxWidth: '260px' }}>
+                    {[
+                      { step: 1, label: 'Uploading PDF…' },
+                      { step: 2, label: 'Reading document with AI…' },
+                      { step: 3, label: 'Extracting profile data…' },
+                      { step: 4, label: 'Saved to profile!' },
+                    ].map(({ step, label }) => {
+                      const isDone    = cvParseStep > step;
+                      const isActive  = cvParseStep === step;
+                      const isPending = cvParseStep < step;
+                      return (
+                        <div key={step} className="cv-step-row" style={{ animationDelay: `${(step - 1) * 0.08}s`, opacity: isPending ? 0.35 : 1 }}>
+                          <div className={`cv-step-icon ${isDone ? 'done' : isActive ? 'active' : 'pending'}`}>
+                            {isDone ? (
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--match-high)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                              </svg>
+                            ) : isActive ? (
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 1s linear infinite' }}>
+                                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                              </svg>
+                            ) : (
+                              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--border-bright)', display: 'block' }} />
+                            )}
+                          </div>
+                          <span style={{
+                            fontSize: 'var(--text-sm)', fontWeight: isActive ? '700' : isDone ? '600' : '400',
+                            color: isDone ? 'var(--match-high)' : isActive ? 'var(--text-primary)' : 'var(--text-tertiary)',
+                          }}>
+                            {label}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '32px', height: '32px', borderRadius: 'var(--r-md)', background: 'rgba(20,184,166,0.12)', border: '1px solid rgba(20,184,166,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -302,19 +405,31 @@ export default function ProfilePage() {
                         const file = e.target.files?.[0];
                         if (!file) return;
                         setIsSaving(true);
+                        setCvParseStep(1);
                         try {
                           const formData = new FormData();
                           formData.append('file', file);
+                          // step 1 → 2 after short delay to show upload state
+                          await new Promise(r => setTimeout(r, 600));
+                          setCvParseStep(2);
                           const res = await fetch('/api/parse-cv', { method: 'POST', body: formData });
+                          setCvParseStep(3);
                           const data = await res.json();
                           if (data.text) {
                             const updated = { ...profile, baseCv: data.text };
                             setProfile(updated);
                             await fetch('/api/profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updated) });
+                            setCvParseStep(4);
                             setSaved(true);
-                            setTimeout(() => setSaved(false), 2000);
-                          } else { alert('Error: ' + (data.error || 'Failed to parse PDF')); }
-                        } catch { alert('Error uploading PDF'); }
+                            setTimeout(() => { setSaved(false); setCvParseStep(0); }, 2200);
+                          } else {
+                            setCvParseStep(0);
+                            alert('Error: ' + (data.error || 'Failed to parse PDF'));
+                          }
+                        } catch {
+                          setCvParseStep(0);
+                          alert('Error uploading PDF');
+                        }
                         finally { setIsSaving(false); e.target.value = ''; }
                       }}
                     />

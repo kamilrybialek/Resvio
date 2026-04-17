@@ -139,7 +139,7 @@ export default function TrackerPage() {
           }
         </button>
         <span style={{ fontWeight: '800', fontSize: '1rem', letterSpacing: '-0.02em' }}>
-          Apply<span style={{ background: 'var(--gradient-brand)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>arr</span>
+          Res<span style={{ background: 'var(--gradient-brand)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>vio</span>
         </span>
       </div>
 

@@ -140,34 +140,11 @@ function parseRoles(lines: string[]): RoleEntry[] {
   return roles;
 }
 
-// ─────────────────────────────────────────────
-// Color palettes — world-class designs
-// ─────────────────────────────────────────────
-
-// Template 1: Executive (clean one-column, blue accents)
-const E = {
-  bg: '#ffffff', text: '#0d1117', muted: '#374151', light: '#6b7280',
-  accent: '#0057b8', accentMid: '#0070e0',
-  border: '#dde1e7', divider: '#c8d0db',
-};
-
-// Template 2: Nordic Premium (dark navy sidebar, gold accents)
-const N = {
-  sidebar: '#0f1923', sidebarMid: '#162030',
-  accent: '#c89a46', accentLight: '#e3b86e',
-  main: '#ffffff', text: '#111827', muted: '#374151',
-  border: '#e5e7eb', sideText: '#f0f4f8', sideMuted: '#8fa3bb',
-};
-
-// Template 3: Atlas (full-width navy header + two-column body)
-const A = {
-  header: '#1b3259', headerText: '#ffffff', headerSub: '#93c5fd',
-  bg: '#ffffff', surface: '#f0f5ff', text: '#0f172a', muted: '#475569',
-  accent: '#1d4ed8', accentMid: '#3b82f6', border: '#e2e8f0',
-};
+// (color palettes are inline per-renderer below)
 
 // ─────────────────────────────────────────────
-// RENDERER 1 — Executive (clean one-column)
+// RENDERER 1 — Classic (Oscar Sun template)
+// Two-column: narrow section labels left / content right
 // ─────────────────────────────────────────────
 function CvMinimal({ markdown }: { markdown: string }) {
   const cv = parseMarkdownCv(markdown);
@@ -178,73 +155,69 @@ function CvMinimal({ markdown }: { markdown: string }) {
     const roles = isRole ? parseRoles(section.lines) : [];
 
     return (
-      <div style={{ marginBottom: '9px' }}>
-        {/* Section header with extending rule */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '5px' }}>
-          <h2 style={{
-            fontSize: '5.5pt', fontWeight: '800', letterSpacing: '0.22em',
-            textTransform: 'uppercase', color: E.accent,
-            margin: 0, whiteSpace: 'nowrap', flexShrink: 0,
+      <div style={{ display: 'flex', borderTop: '1px solid #dedede', paddingTop: '14px', marginBottom: '14px' }}>
+        {/* Left: section label */}
+        <div style={{ width: '88px', flexShrink: 0, paddingRight: '10px', paddingTop: '1px' }}>
+          <span style={{
+            fontSize: '7.5pt', fontWeight: '700', letterSpacing: '0.1em',
+            textTransform: 'uppercase', color: '#333',
           }}>
-            {section.title.replace('PROFESSIONAL ', '').replace(' & COMPETENCIES', '& COMP.')}
-          </h2>
-          <div style={{ flex: 1, height: '0.75px', background: E.divider }} />
+            {section.title.replace('PROFESSIONAL ', '')}
+          </span>
         </div>
 
-        {isRole && roles.length > 0 ? (
-          roles.map((role, ri) => (
-            <div key={ri} style={{ marginBottom: ri < roles.length - 1 ? '6px' : 0, paddingLeft: '2px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px' }}>
-                <span style={{ fontSize: '8.5pt', fontWeight: '700', color: E.text }}>
-                  {role.company || role.title}
-                </span>
+        {/* Right: content */}
+        <div style={{ flex: 1 }}>
+          {isRole && roles.length > 0 ? (
+            roles.map((role, ri) => (
+              <div key={ri} style={{ marginBottom: ri < roles.length - 1 ? '14px' : 0 }}>
                 {role.dates && (
-                  <span style={{ fontSize: '7pt', color: E.light, flexShrink: 0, fontStyle: 'italic' }}>
-                    {role.dates}
-                  </span>
+                  <div style={{ fontSize: '8.5pt', color: '#999', marginBottom: '3px' }}>{role.dates}</div>
                 )}
+                <div style={{ fontSize: '10.5pt', fontWeight: '700', color: '#1a1a1a', lineHeight: 1.2 }}>
+                  {role.company || role.title}
+                </div>
+                {role.company && role.title && (
+                  <div style={{ fontSize: '9.5pt', color: '#666', fontStyle: 'italic', margin: '2px 0 5px' }}>
+                    {role.title}{role.location ? ` · ${role.location}` : ''}
+                  </div>
+                )}
+                {role.bullets.map((b, bi) => (
+                  <div key={bi} style={{ display: 'flex', gap: '7px', fontSize: '9.5pt', color: '#555', margin: '3px 0', alignItems: 'flex-start', lineHeight: '1.55' }}>
+                    <span style={{ flexShrink: 0, marginTop: '1px', color: '#aaa' }}>–</span>
+                    <span dangerouslySetInnerHTML={{ __html: inlineRender(b) }} />
+                  </div>
+                ))}
               </div>
-              {role.company && role.title && (
-                <p style={{ fontSize: '7.5pt', color: E.accent, margin: '1px 0 2px', fontWeight: '500' }}>
-                  {role.title}{role.location ? ` · ${role.location}` : ''}
-                </p>
-              )}
-              {role.bullets.map((b, bi) => (
-                <div key={bi} style={{ display: 'flex', gap: '5px', margin: '1.5px 0', fontSize: '7.5pt', alignItems: 'flex-start' }}>
-                  <span style={{ color: E.accentMid, flexShrink: 0, fontSize: '7pt', lineHeight: '1.4' }}>▸</span>
-                  <span dangerouslySetInnerHTML={{ __html: inlineRender(b) }} style={{ color: E.muted }} />
-                </div>
-              ))}
-            </div>
-          ))
-        ) : (
-          section.lines.map((raw, li) => {
-            const t = raw.trim();
-            if (!t) return null;
-            if (t.startsWith('### ')) {
-              const parts = t.slice(4).split('|').map(s => s.trim());
+            ))
+          ) : (
+            section.lines.map((raw, li) => {
+              const t = raw.trim();
+              if (!t) return null;
+              if (t.startsWith('### ')) {
+                const parts = t.slice(4).split('|').map(s => s.trim());
+                return (
+                  <div key={li} style={{ marginBottom: '10px' }}>
+                    <div style={{ fontSize: '10.5pt', fontWeight: '700', color: '#1a1a1a' }}>{parts[0]}</div>
+                    {parts[1] && <div style={{ fontSize: '9.5pt', color: '#666' }}>{parts[1]}{parts[2] ? ` · ${parts[2]}` : ''}</div>}
+                  </div>
+                );
+              }
+              if (t.startsWith('- ') || t.startsWith('• ')) {
+                return (
+                  <div key={li} style={{ display: 'flex', gap: '7px', fontSize: '9.5pt', color: '#555', margin: '3px 0', alignItems: 'flex-start', lineHeight: '1.55' }}>
+                    <span style={{ flexShrink: 0, color: '#aaa' }}>–</span>
+                    <span dangerouslySetInnerHTML={{ __html: inlineRender(t.slice(2)) }} />
+                  </div>
+                );
+              }
               return (
-                <div key={li} style={{ marginBottom: '3px', paddingLeft: '2px' }}>
-                  <span style={{ fontSize: '8pt', fontWeight: '700', color: E.text }}>{parts[0]}</span>
-                  {parts[1] && <span style={{ fontSize: '7.5pt', color: E.muted }}> · {parts[1]}</span>}
-                  {parts[2] && <span style={{ fontSize: '7pt', color: E.light }}> · {parts[2]}</span>}
-                </div>
+                <p key={li} style={{ fontSize: '9.5pt', color: '#555', margin: '0 0 4px', lineHeight: '1.6' }}
+                  dangerouslySetInnerHTML={{ __html: inlineRender(t) }} />
               );
-            }
-            if (t.startsWith('- ') || t.startsWith('• ')) {
-              return (
-                <div key={li} style={{ display: 'flex', gap: '5px', margin: '1.5px 0', fontSize: '7.5pt', alignItems: 'flex-start' }}>
-                  <span style={{ color: E.accentMid, flexShrink: 0, fontSize: '7pt', lineHeight: '1.4' }}>▸</span>
-                  <span dangerouslySetInnerHTML={{ __html: inlineRender(t.slice(2)) }} style={{ color: E.muted }} />
-                </div>
-              );
-            }
-            return (
-              <p key={li} style={{ margin: '0 0 2px', fontSize: '8pt', color: E.muted, lineHeight: '1.55', paddingLeft: '2px' }}
-                dangerouslySetInnerHTML={{ __html: inlineRender(t) }} />
-            );
-          })
-        )}
+            })
+          )}
+        </div>
       </div>
     );
   };
@@ -252,49 +225,35 @@ function CvMinimal({ markdown }: { markdown: string }) {
   return (
     <div id="cv-print-root" style={{
       width: '210mm', minHeight: '297mm', maxHeight: '297mm',
-      background: E.bg, overflow: 'hidden',
+      background: '#ffffff', overflow: 'hidden',
       fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
-      fontSize: '9pt', lineHeight: '1.45', color: E.text,
+      color: '#1a1a1a', lineHeight: 1.45,
       display: 'flex', flexDirection: 'column',
-      boxShadow: '0 8px 60px rgba(0,0,0,0.3)',
+      boxShadow: '0 8px 60px rgba(0,0,0,0.18)',
     }}>
-      {/* Gradient top accent strip */}
-      <div style={{ height: '4px', background: `linear-gradient(90deg, ${E.accent} 0%, ${E.accentMid} 50%, #7c3aed 100%)`, flexShrink: 0 }} />
-
       {/* Header */}
-      <div style={{ padding: '13mm 18mm 9mm', flexShrink: 0 }}>
-        <h1 style={{ fontSize: '21pt', fontWeight: '800', margin: '0 0 4px', letterSpacing: '-0.03em', color: E.text, lineHeight: 1 }}>
+      <div style={{ padding: '14mm 16mm 10mm', flexShrink: 0 }}>
+        <h1 style={{ fontSize: '23pt', fontWeight: '800', margin: '0 0 5px', color: '#111', letterSpacing: '-0.02em', lineHeight: 1 }}>
           {cv.name}
         </h1>
         {cv.jobTitle && (
-          <p style={{ fontSize: '9.5pt', color: E.accent, fontWeight: '600', margin: '0 0 7px', letterSpacing: '0.01em' }}>
-            {cv.jobTitle}
-          </p>
+          <p style={{ fontSize: '11pt', color: '#777', fontWeight: '400', margin: '0 0 9px' }}>{cv.jobTitle}</p>
         )}
         {cv.contact.length > 0 && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', fontSize: '7pt', color: E.muted }}>
-            {cv.contact.map((c, i) => (
-              <React.Fragment key={i}>
-                {i > 0 && <span style={{ padding: '0 6px', color: E.divider, fontWeight: '300' }}>|</span>}
-                <span>{c}</span>
-              </React.Fragment>
-            ))}
+          <div style={{ fontSize: '9.5pt', color: '#888', lineHeight: 1.7 }}>
+            {cv.contact.map((c, i) => <div key={i}>{c}</div>)}
           </div>
         )}
       </div>
 
-      {/* Accent separator */}
-      <div style={{ margin: '0 18mm 0', height: '1.5px', background: `linear-gradient(90deg, ${E.accent}, transparent)`, flexShrink: 0 }} />
-
-      {/* Body */}
-      <div style={{ flex: 1, padding: '7mm 18mm', overflow: 'hidden' }}>
+      {/* Sections */}
+      <div style={{ flex: 1, padding: '0 16mm 8mm', overflow: 'hidden' }}>
         {cv.allSections.map((s, i) => <React.Fragment key={i}>{renderSection(s)}</React.Fragment>)}
       </div>
 
-      {/* GDPR */}
       {cv.gdpr && (
-        <div style={{ padding: '3mm 18mm 5mm', borderTop: `1px solid ${E.border}`, flexShrink: 0 }}>
-          <p style={{ fontSize: '5.5pt', color: '#aaa', fontStyle: 'italic', margin: 0 }}>{cv.gdpr}</p>
+        <div style={{ padding: '4mm 16mm 5mm', borderTop: '1px solid #e8e8e8', flexShrink: 0 }}>
+          <p style={{ fontSize: '7pt', color: '#bbb', fontStyle: 'italic', margin: 0 }}>{cv.gdpr}</p>
         </div>
       )}
     </div>
@@ -302,77 +261,24 @@ function CvMinimal({ markdown }: { markdown: string }) {
 }
 
 // ─────────────────────────────────────────────
-// RENDERER 2 — Nordic Premium
+// RENDERER 2 — Elegant (Emma Woodhouse template)
+// Left sidebar: photo + skills + contact
+// Right main: CV label + name + content
 // ─────────────────────────────────────────────
 function CvNordic({ markdown }: { markdown: string }) {
   const cv = parseMarkdownCv(markdown);
   const initials = cv.name.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('');
 
-  const renderMainSection = (section: CvSection) => {
-    const key = section.title.toLowerCase();
-    const isRole = key.includes('experience') || key.includes('education');
-    const roles = isRole ? parseRoles(section.lines) : [];
-
-    return (
-      <div style={{ marginBottom: '13px' }}>
-        {/* Section header with left gold accent bar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '7px' }}>
-          <div style={{ width: '3px', height: '13px', background: N.accent, borderRadius: '2px', flexShrink: 0 }} />
-          <h2 style={{ fontSize: '6.5pt', fontWeight: '800', letterSpacing: '0.18em', textTransform: 'uppercase', color: N.text, margin: 0 }}>
-            {section.title}
-          </h2>
-          <div style={{ flex: 1, height: '0.5px', background: N.border }} />
-        </div>
-
-        {isRole && roles.length > 0 ? (
-          roles.map((role, ri) => (
-            <div key={ri} style={{ marginBottom: ri < roles.length - 1 ? '8px' : 0, paddingLeft: '10px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '6px' }}>
-                <span style={{ fontSize: '8.5pt', fontWeight: '700', color: N.text }}>
-                  {role.company || role.title}
-                </span>
-                {role.dates && (
-                  <span style={{ fontSize: '6.5pt', color: '#fff', flexShrink: 0, background: N.accent, padding: '1px 5px', borderRadius: '3px', fontWeight: '600' }}>
-                    {role.dates}
-                  </span>
-                )}
-              </div>
-              {role.company && role.title && (
-                <p style={{ fontSize: '7.5pt', color: N.accent, margin: '1px 0 3px', fontWeight: '500' }}>
-                  {role.title}{role.location ? ` · ${role.location}` : ''}
-                </p>
-              )}
-              {role.bullets.map((b, bi) => (
-                <div key={bi} style={{ display: 'flex', gap: '6px', margin: '1.5px 0', fontSize: '7.5pt', color: N.muted, alignItems: 'flex-start' }}>
-                  <span style={{ color: N.accent, flexShrink: 0, fontSize: '8pt', lineHeight: '1.3' }}>–</span>
-                  <span dangerouslySetInnerHTML={{ __html: inlineRender(b) }} style={{ color: N.text }} />
-                </div>
-              ))}
-            </div>
-          ))
-        ) : (
-          <div style={{ paddingLeft: '10px' }}>
-            {section.lines.map((raw, li) => {
-              const t = raw.trim();
-              if (!t) return null;
-              if (t.startsWith('- ') || t.startsWith('• ')) {
-                return (
-                  <div key={li} style={{ display: 'flex', gap: '6px', margin: '2px 0', fontSize: '7.5pt', color: N.muted, alignItems: 'flex-start' }}>
-                    <span style={{ color: N.accent, flexShrink: 0 }}>–</span>
-                    <span dangerouslySetInnerHTML={{ __html: inlineRender(t.replace(/^[-•]\s*/, '')) }} style={{ color: N.text }} />
-                  </div>
-                );
-              }
-              return (
-                <p key={li} style={{ margin: '2px 0', fontSize: '8pt', color: N.muted, lineHeight: '1.55' }}
-                  dangerouslySetInnerHTML={{ __html: inlineRender(t) }} />
-              );
-            })}
-          </div>
-        )}
-      </div>
-    );
-  };
+  const SectionHeader = ({ title }: { title: string }) => (
+    <div style={{
+      fontSize: '7.5pt', fontWeight: '700', letterSpacing: '0.14em',
+      textTransform: 'uppercase', color: '#222',
+      borderBottom: '1.5px solid #222',
+      paddingBottom: '5px', marginBottom: '10px',
+    }}>
+      {title}
+    </div>
+  );
 
   return (
     <div id="cv-print-root" style={{
@@ -380,91 +286,151 @@ function CvNordic({ markdown }: { markdown: string }) {
       display: 'flex', flexDirection: 'row',
       fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
       background: '#ffffff',
-      boxShadow: '0 8px 60px rgba(0,0,0,0.3)',
+      boxShadow: '0 8px 60px rgba(0,0,0,0.18)',
       overflow: 'hidden',
     }}>
-      {/* ── SIDEBAR ── */}
-      <div style={{ width: '67mm', background: N.sidebar, flexShrink: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
-        {/* Top gold accent bar */}
-        <div style={{ height: '4px', background: `linear-gradient(90deg, ${N.accent}, ${N.accentLight})`, flexShrink: 0 }} />
-
-        {/* Avatar + identity block */}
-        <div style={{ padding: '20px 16px 16px', background: N.sidebarMid, flexShrink: 0 }}>
-          <div style={{
-            width: '52px', height: '52px', borderRadius: '50%',
-            border: `2.5px solid ${N.accent}`,
-            background: `${N.accent}18`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            marginBottom: '12px',
-            fontSize: '13pt', fontWeight: '800', color: N.accent, letterSpacing: '-0.02em',
-          }}>
-            {initials}
-          </div>
-          <h1 style={{ fontSize: '11pt', fontWeight: '800', color: N.sideText, margin: '0 0 4px', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
-            {cv.name}
-          </h1>
-          {cv.jobTitle && (
-            <p style={{ fontSize: '6.5pt', color: N.accent, margin: 0, letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: '600' }}>
-              {cv.jobTitle}
-            </p>
-          )}
+      {/* ── LEFT SIDEBAR ── */}
+      <div style={{
+        width: '60mm', flexShrink: 0,
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        padding: '13mm 9mm 12mm',
+        background: '#f6f6f6',
+        borderRight: '1px solid #e8e8e8',
+      }}>
+        {/* Photo / avatar placeholder */}
+        <div style={{
+          width: '90px', height: '110px',
+          background: '#d8d8d8',
+          marginBottom: '20px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '22pt', fontWeight: '700', color: '#aaa',
+          flexShrink: 0,
+        }}>
+          {initials}
         </div>
 
-        {/* Contact */}
-        {cv.contact.length > 0 && (
-          <div style={{ padding: '12px 16px 8px', borderTop: `1px solid ${N.accent}25`, flexShrink: 0 }}>
-            <p style={{ fontSize: '5.5pt', fontWeight: '800', letterSpacing: '0.2em', textTransform: 'uppercase', color: N.accent, margin: '0 0 7px' }}>
-              Contact
-            </p>
-            {cv.contact.map((c, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', margin: '3px 0' }}>
-                <span style={{ color: N.accent, flexShrink: 0, fontSize: '5pt', marginTop: '2pt' }}>◆</span>
-                <p style={{ fontSize: '7pt', color: N.sideText, margin: 0, lineHeight: '1.4', wordBreak: 'break-all' }}>{c}</p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Sidebar sections (Skills, Languages, etc.) */}
+        {/* Skill / sidebar sections */}
         {cv.sidebarSections.map((section, si) => (
-          <div key={si} style={{ padding: '10px 16px 6px', borderTop: `1px solid ${N.accent}25`, flexShrink: 0 }}>
-            <p style={{ fontSize: '5.5pt', fontWeight: '800', letterSpacing: '0.2em', textTransform: 'uppercase', color: N.accent, margin: '0 0 8px' }}>
-              {section.title}
-            </p>
+          <div key={si} style={{ width: '100%', marginBottom: '18px' }}>
+            <SectionHeader title={section.title} />
             {section.lines.map((line, li) => {
               const t = line.trim();
               if (!t) return null;
               if (t.startsWith('### ')) {
-                return <p key={li} style={{ fontSize: '7pt', fontWeight: '700', color: N.accentLight, margin: '6px 0 2px' }}>{t.replace(/^###\s*/, '')}</p>;
+                return (
+                  <p key={li} style={{ fontSize: '9.5pt', fontWeight: '600', color: '#333', margin: '8px 0 3px', textAlign: 'center' }}>
+                    {t.replace(/^###\s*/, '')}
+                  </p>
+                );
               }
               if (t.startsWith('- ') || t.startsWith('• ')) {
                 return (
-                  <div key={li} style={{ display: 'flex', gap: '5px', margin: '2.5px 0', fontSize: '7pt', color: N.sideText, alignItems: 'flex-start' }}>
-                    <span style={{ color: N.accent, flexShrink: 0, marginTop: '1.5pt', fontSize: '5pt' }}>◆</span>
-                    <span dangerouslySetInnerHTML={{ __html: inlineRender(t.replace(/^[-•]\s*/, '')) }} />
-                  </div>
+                  <p key={li} style={{ fontSize: '9pt', color: '#555', margin: '4px 0', lineHeight: '1.45', textAlign: 'center' }}>
+                    {t.replace(/^[-•]\s*/, '')}
+                  </p>
                 );
               }
               return (
-                <p key={li} style={{ margin: '2px 0', fontSize: '7pt', color: N.sideMuted, lineHeight: '1.5' }}
+                <p key={li} style={{ fontSize: '9pt', color: '#666', margin: '3px 0', lineHeight: '1.45', textAlign: 'center' }}
                   dangerouslySetInnerHTML={{ __html: inlineRender(t) }} />
               );
             })}
           </div>
         ))}
 
-        {/* Bottom glow accent */}
-        <div style={{ marginTop: 'auto', height: '40px', background: `linear-gradient(0deg, ${N.accent}20, transparent)` }} />
+        {/* Contact — pushed to bottom */}
+        {cv.contact.length > 0 && (
+          <div style={{ width: '100%', marginTop: 'auto' }}>
+            <SectionHeader title="Contact" />
+            {cv.contact.map((c, i) => (
+              <p key={i} style={{ fontSize: '9pt', color: '#555', margin: '4px 0', wordBreak: 'break-all', textAlign: 'center', lineHeight: '1.45' }}>{c}</p>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* ── MAIN COLUMN ── */}
-      <div style={{ flex: 1, padding: '22px 18px 14px', display: 'flex', flexDirection: 'column', background: '#ffffff', minWidth: 0 }}>
-        {cv.mainSections.map((section, si) => (
-          <React.Fragment key={si}>{renderMainSection(section)}</React.Fragment>
-        ))}
+      {/* ── RIGHT MAIN COLUMN ── */}
+      <div style={{ flex: 1, padding: '11mm 12mm 12mm 12mm', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
+        {/* "CV" label — top right corner */}
+        <div style={{
+          position: 'absolute', top: '9mm', right: '10mm',
+          background: '#111', color: '#fff',
+          fontSize: '8pt', fontWeight: '700', letterSpacing: '0.12em',
+          padding: '4px 9px', flexShrink: 0,
+        }}>
+          CV
+        </div>
+
+        {/* Name block */}
+        <div style={{ marginBottom: '14px', paddingTop: '1mm' }}>
+          <h1 style={{
+            fontSize: '21pt', fontWeight: '800', color: '#111',
+            margin: '0 0 7px', letterSpacing: '0.04em',
+            textTransform: 'uppercase', lineHeight: 1,
+          }}>
+            {cv.name}
+          </h1>
+          <div style={{ width: '36px', height: '2px', background: '#111', marginBottom: '10px' }} />
+          {cv.jobTitle && (
+            <p style={{ fontSize: '10pt', color: '#666', margin: 0, lineHeight: 1.4 }}>{cv.jobTitle}</p>
+          )}
+        </div>
+
+        {/* Main sections */}
+        {cv.mainSections.map((section, si) => {
+          const key = section.title.toLowerCase();
+          const isRole = key.includes('experience') || key.includes('education');
+          const roles = isRole ? parseRoles(section.lines) : [];
+
+          return (
+            <div key={si} style={{ marginBottom: '16px' }}>
+              <SectionHeader title={section.title} />
+
+              {isRole && roles.length > 0 ? (
+                roles.map((role, ri) => (
+                  <div key={ri} style={{ marginBottom: ri < roles.length - 1 ? '11px' : 0, display: 'flex', gap: '14px' }}>
+                    {role.dates && (
+                      <div style={{ fontSize: '8.5pt', color: '#999', flexShrink: 0, minWidth: '68px', lineHeight: 1.5, paddingTop: '1px' }}>
+                        {role.dates.replace(/\s*[-–]\s*/, ' → ')}
+                      </div>
+                    )}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '10pt', color: '#444', margin: '0 0 3px', lineHeight: 1.4 }}>
+                        {role.title && <span style={{ fontWeight: '600', color: '#111' }}>{role.title}</span>}
+                        {role.title && role.company && <span style={{ color: '#aaa', margin: '0 4px' }}>·</span>}
+                        {role.company && <span style={{ color: '#777' }}>{role.company}</span>}
+                        {role.location && <span style={{ color: '#aaa' }}>, {role.location}</span>}
+                      </div>
+                      {role.bullets.map((b, bi) => (
+                        <p key={bi} style={{ fontSize: '9.5pt', color: '#666', margin: '3px 0', lineHeight: '1.55' }}
+                          dangerouslySetInnerHTML={{ __html: inlineRender(b) }} />
+                      ))}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                section.lines.map((raw, li) => {
+                  const t = raw.trim();
+                  if (!t) return null;
+                  if (t.startsWith('- ') || t.startsWith('• ')) {
+                    return (
+                      <p key={li} style={{ fontSize: '9.5pt', color: '#666', margin: '3px 0', lineHeight: '1.55' }}
+                        dangerouslySetInnerHTML={{ __html: inlineRender(t.slice(2)) }} />
+                    );
+                  }
+                  return (
+                    <p key={li} style={{ fontSize: '9.5pt', color: '#555', margin: '0 0 5px', lineHeight: '1.65' }}
+                      dangerouslySetInnerHTML={{ __html: inlineRender(t) }} />
+                  );
+                })
+              )}
+            </div>
+          );
+        })}
+
         {cv.gdpr && (
-          <div style={{ marginTop: 'auto', borderTop: `1px solid ${N.border}`, paddingTop: '6px' }}>
-            <p style={{ fontSize: '5.5pt', color: '#bbb', fontStyle: 'italic', margin: 0 }}>{cv.gdpr}</p>
+          <div style={{ marginTop: 'auto', borderTop: '1px solid #e8e8e8', paddingTop: '6px' }}>
+            <p style={{ fontSize: '7pt', color: '#bbb', fontStyle: 'italic', margin: 0 }}>{cv.gdpr}</p>
           </div>
         )}
       </div>
@@ -473,166 +439,196 @@ function CvNordic({ markdown }: { markdown: string }) {
 }
 
 // ─────────────────────────────────────────────
-// RENDERER 3 — Atlas (navy header + two-column)
+// RENDERER 3 — Grid (Mary Smith template)
+// Thin-border grid: header | profile | edu/exp | skills
 // ─────────────────────────────────────────────
 function CvGrid({ markdown }: { markdown: string }) {
   const cv = parseMarkdownCv(markdown);
-  const findSec = (kw: string) => cv.allSections.find(s => s.title.toLowerCase().includes(kw.toLowerCase()));
+  const initials = cv.name.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('');
 
-  const summary = findSec('summary');
+  const findSec = (kw: string) => cv.allSections.find(s => s.title.toLowerCase().includes(kw.toLowerCase()));
+  const summary   = findSec('summary') || findSec('profile') || findSec('about');
   const experience = findSec('experience');
-  const education = findSec('education');
-  const skills = findSec('skill');
-  const languages = findSec('language');
+  const education  = findSec('education');
+  const skills     = findSec('skill');
+  const languages  = findSec('language');
 
   const expRoles = experience ? parseRoles(experience.lines) : [];
-  const eduRoles = education ? parseRoles(education.lines) : [];
+  const eduRoles = education  ? parseRoles(education.lines)  : [];
 
-  const SecHeader = ({ title }: { title: string }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '7px' }}>
-      <div style={{ width: '10px', height: '2px', background: A.accent, borderRadius: '1px', flexShrink: 0 }} />
-      <h2 style={{ fontSize: '5.5pt', fontWeight: '800', letterSpacing: '0.22em', textTransform: 'uppercase', color: A.accent, margin: 0 }}>
-        {title.replace('PROFESSIONAL ', '')}
-      </h2>
+  // Parse skill items — split comma-separated or bullet lines
+  const allSkillLines = (skills?.lines || []).concat(languages?.lines || []);
+  const skillItems: string[] = allSkillLines
+    .flatMap(l => l.split(/[,;]/).map(s => s.trim().replace(/^[-•]\s*/, '')))
+    .filter(Boolean)
+    .slice(0, 12);
+
+  // Soft skills — from other sections or language lines
+  const softSkills: string[] = (languages?.lines || [])
+    .map(l => l.trim().replace(/^[-•]\s*/, ''))
+    .filter(Boolean);
+
+  const BORDER = '1px solid #d4d4d4';
+
+  const GridSecHeader = ({ title, blue }: { title: string; blue?: boolean }) => (
+    <div style={{
+      fontSize: '7.5pt', fontWeight: '700', letterSpacing: '0.14em',
+      textTransform: 'uppercase',
+      color: blue ? '#2563eb' : '#222',
+      marginBottom: '11px',
+    }}>
+      {title}
     </div>
   );
-
-  // Parse skill chips from lines (handles "- React, TypeScript" or "- React" styles)
-  const skillChips = (skills?.lines || [])
-    .flatMap(l => l.split(/[,;]|(?:\s*•\s*)|(?:\s*-\s+)/).map(s => s.trim().replace(/^[-•]\s*/, '')))
-    .filter(Boolean);
 
   return (
     <div id="cv-print-root" style={{
       width: '210mm', minHeight: '297mm', maxHeight: '297mm',
-      background: A.bg, overflow: 'hidden',
+      background: '#ffffff', overflow: 'hidden',
       fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
-      fontSize: '8.5pt', lineHeight: '1.4', color: A.text,
+      color: '#1a1a1a',
       display: 'flex', flexDirection: 'column',
-      boxShadow: '0 8px 60px rgba(0,0,0,0.3)',
+      border: BORDER,
+      boxShadow: '0 8px 60px rgba(0,0,0,0.18)',
     }}>
-      {/* ── FULL-WIDTH HEADER BAND ── */}
-      <div style={{ background: A.header, padding: '14mm 18mm 12mm', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexShrink: 0 }}>
-        <div>
+
+      {/* ── ROW 1: Header ── */}
+      <div style={{ display: 'flex', borderBottom: BORDER, flexShrink: 0 }}>
+        <div style={{ width: '50%', borderRight: BORDER, padding: '7mm 8mm' }}>
+          <span style={{ fontSize: '8pt', fontWeight: '700', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#444' }}>
+            Resume
+          </span>
+        </div>
+        <div style={{ flex: 1, padding: '7mm 8mm', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          {cv.contact.map((c, i) => (
+            <span key={i} style={{ fontSize: '9pt', color: '#666' }}>
+              {c}{i < cv.contact.length - 1 ? <span style={{ color: '#ccc', margin: '0 4px' }}>/</span> : ''}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ── ROW 2: Profile (photo | name + bio) ── */}
+      <div style={{ display: 'flex', borderBottom: BORDER, flexShrink: 0 }}>
+        {/* Photo */}
+        <div style={{ width: '50%', borderRight: BORDER, padding: '8mm', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '120px' }}>
+          <div style={{
+            width: '100px', height: '120px',
+            background: '#e4e4e4',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '22pt', fontWeight: '700', color: '#aaa',
+          }}>
+            {initials}
+          </div>
+        </div>
+        {/* Name + bio */}
+        <div style={{ flex: 1, padding: '8mm 8mm' }}>
           {cv.jobTitle && (
-            <p style={{ fontSize: '6.5pt', color: A.headerSub, fontWeight: '600', margin: '0 0 4px', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
+            <p style={{ fontSize: '8.5pt', color: '#999', margin: '0 0 5px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               {cv.jobTitle}
             </p>
           )}
-          <h1 style={{ fontSize: '22pt', fontWeight: '800', color: A.headerText, margin: 0, letterSpacing: '-0.03em', lineHeight: 1 }}>
-            {cv.name}
+          <div style={{ width: '38px', height: '1px', background: '#bbb', marginBottom: '8px' }} />
+          <h1 style={{ fontSize: '21pt', fontWeight: '800', color: '#111', margin: '0 0 10px', letterSpacing: '-0.01em', lineHeight: 1 }}>
+            {cv.name.toUpperCase()}
           </h1>
+          {summary && (
+            <p style={{ fontSize: '9.5pt', color: '#666', margin: 0, lineHeight: '1.65' }}>
+              {summary.lines.filter(l => l.trim()).map(l => l.trim().replace(/^[-•]\s*/, '')).join(' ')}
+            </p>
+          )}
         </div>
-        {cv.contact.length > 0 && (
-          <div style={{ textAlign: 'right', fontSize: '7pt', color: A.headerSub, flexShrink: 0, maxWidth: '100mm' }}>
-            {cv.contact.map((c, i) => <p key={i} style={{ margin: '2px 0', wordBreak: 'break-all' }}>{c}</p>)}
-          </div>
-        )}
       </div>
 
-      {/* Summary strip (if exists) */}
-      {summary && (
-        <div style={{ background: A.surface, borderBottom: `1px solid ${A.border}`, padding: '7px 18mm', flexShrink: 0 }}>
-          <p style={{ fontSize: '7.5pt', color: A.muted, margin: 0, lineHeight: '1.6', fontStyle: 'italic' }}>
-            {summary.lines.filter(l => l.trim()).map(l => l.trim().replace(/^[-•]\s*/, '')).join(' ')}
-          </p>
-        </div>
-      )}
-
-      {/* ── TWO-COLUMN BODY ── */}
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {/* Left: Experience (60%) */}
-        <div style={{ flex: '3', borderRight: `1px solid ${A.border}`, padding: '11px 13mm 10px 18mm', overflow: 'hidden' }}>
-          <SecHeader title="Experience" />
-          {expRoles.map((role, ri) => (
-            <div key={ri} style={{ marginBottom: '7px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '5px' }}>
-                <span style={{ fontSize: '8.5pt', fontWeight: '700', color: A.text }}>{role.company || role.title}</span>
-                {role.dates && (
-                  <span style={{ fontSize: '6.5pt', color: A.muted, flexShrink: 0 }}>{role.dates}</span>
-                )}
-              </div>
-              {role.company && role.title && (
-                <p style={{ fontSize: '7.5pt', color: A.accent, margin: '1px 0 2px', fontWeight: '500' }}>
-                  {role.title}{role.location ? ` · ${role.location}` : ''}
-                </p>
-              )}
-              {role.bullets.map((b, bi) => (
-                <div key={bi} style={{ display: 'flex', gap: '5px', margin: '1.5px 0', fontSize: '7.5pt', alignItems: 'flex-start' }}>
-                  <span style={{ color: A.accentMid, flexShrink: 0, fontSize: '7pt', lineHeight: '1.4' }}>▸</span>
-                  <span dangerouslySetInnerHTML={{ __html: inlineRender(b) }} style={{ color: A.muted }} />
+      {/* ── ROW 3: Education | Experience ── */}
+      <div style={{ display: 'flex', borderBottom: BORDER, flex: 1, overflow: 'hidden' }}>
+        {/* Education */}
+        <div style={{ width: '50%', borderRight: BORDER, padding: '7mm 8mm', overflow: 'hidden' }}>
+          <GridSecHeader title="Education" />
+          {eduRoles.length > 0 ? eduRoles.map((r, ri) => (
+            <div key={ri} style={{ marginBottom: '11px' }}>
+              {r.dates && <p style={{ fontSize: '8.5pt', color: '#999', margin: '0 0 2px' }}>{r.dates}</p>}
+              <p style={{ fontSize: '10pt', fontWeight: '600', color: '#111', margin: '0 0 1px', lineHeight: 1.3 }}>
+                {r.title || r.company}
+              </p>
+              {r.title && r.company && <p style={{ fontSize: '9.5pt', color: '#666', margin: '0 0 1px' }}>{r.company}</p>}
+              {r.location && <p style={{ fontSize: '9pt', color: '#999', margin: 0 }}>{r.location}</p>}
+            </div>
+          )) : education?.lines.filter(l => l.trim()).map((line, li) => {
+            const t = line.trim();
+            if (t.startsWith('### ')) {
+              const parts = t.slice(4).split('|').map(s => s.trim());
+              return (
+                <div key={li} style={{ marginBottom: '10px' }}>
+                  <p style={{ fontSize: '10pt', fontWeight: '600', margin: '0 0 1px', lineHeight: 1.3 }}>{parts[0]}</p>
+                  {parts[1] && <p style={{ fontSize: '9.5pt', color: '#666', margin: 0 }}>{parts[1]}{parts[2] ? ` · ${parts[2]}` : ''}</p>}
                 </div>
+              );
+            }
+            return <p key={li} style={{ fontSize: '9.5pt', color: '#666', margin: '3px 0' }} dangerouslySetInnerHTML={{ __html: inlineRender(t) }} />;
+          })}
+        </div>
+
+        {/* Experience */}
+        <div style={{ flex: 1, padding: '7mm 8mm', overflow: 'hidden' }}>
+          <GridSecHeader title="Experience" />
+          {expRoles.map((role, ri) => (
+            <div key={ri} style={{ marginBottom: '11px' }}>
+              {role.dates && <p style={{ fontSize: '8.5pt', color: '#999', margin: '0 0 2px' }}>{role.dates}</p>}
+              <p style={{ fontSize: '10pt', color: '#333', margin: '0 0 3px', lineHeight: 1.3 }}>
+                {role.title && <span style={{ fontWeight: '700', color: '#111' }}>{role.title}</span>}
+                {role.title && role.company && <span style={{ color: '#ccc', margin: '0 5px' }}>/</span>}
+                {role.company && <span style={{ fontWeight: '500' }}>{role.company}</span>}
+              </p>
+              {role.bullets.map((b, bi) => (
+                <p key={bi} style={{ fontSize: '9.5pt', color: '#666', margin: '3px 0', lineHeight: '1.55' }}
+                  dangerouslySetInnerHTML={{ __html: inlineRender(b) }} />
               ))}
             </div>
           ))}
         </div>
+      </div>
 
-        {/* Right: Education + Skills + Languages (40%) */}
-        <div style={{ flex: '2', padding: '11px 18mm 10px 13mm', display: 'flex', flexDirection: 'column', gap: '10px', overflow: 'hidden' }}>
-          {/* Education */}
-          {(eduRoles.length > 0 || education) && (
-            <div>
-              <SecHeader title="Education" />
-              {eduRoles.length > 0 ? eduRoles.map((r, ri) => (
-                <div key={ri} style={{ marginBottom: '6px' }}>
-                  <p style={{ fontSize: '8pt', fontWeight: '700', margin: '0 0 1px', color: A.text }}>{r.title}</p>
-                  {r.company && <p style={{ fontSize: '7.5pt', color: A.muted, margin: '0 0 1px' }}>{r.company}</p>}
-                  {(r.dates || r.location) && (
-                    <p style={{ fontSize: '7pt', color: A.muted, margin: 0 }}>{[r.dates, r.location].filter(Boolean).join(' · ')}</p>
-                  )}
+      {/* ── ROW 4: Skills (dots) | Professional | Social ── */}
+      <div style={{ display: 'flex', borderBottom: BORDER, flexShrink: 0 }}>
+        {/* Skills with dot ratings */}
+        <div style={{ width: '33.33%', borderRight: BORDER, padding: '6mm 8mm' }}>
+          <GridSecHeader title="Skills" />
+          {skillItems.slice(0, 7).map((skill, si) => {
+            const dots = Math.max(5 - si, 2);
+            return (
+              <div key={si} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '5px 0' }}>
+                <span style={{ fontSize: '9.5pt', color: '#444' }}>{skill}</span>
+                <div style={{ display: 'flex', gap: '3px', flexShrink: 0 }}>
+                  {[1,2,3,4,5].map(d => (
+                    <div key={d} style={{ width: '7px', height: '7px', borderRadius: '50%', background: d <= dots ? '#222' : '#ddd' }} />
+                  ))}
                 </div>
-              )) : education?.lines.filter(l => l.trim()).map((line, li) => {
-                const t = line.trim();
-                if (t.startsWith('### ')) {
-                  const parts = t.slice(4).split('|').map(s => s.trim());
-                  return (
-                    <div key={li} style={{ marginBottom: '5px' }}>
-                      <p style={{ fontSize: '8pt', fontWeight: '700', margin: '0 0 1px' }}>{parts[0]}</p>
-                      {parts[1] && <p style={{ fontSize: '7.5pt', color: A.muted, margin: 0 }}>{parts[1]}{parts[2] ? ` · ${parts[2]}` : ''}</p>}
-                    </div>
-                  );
-                }
-                return <p key={li} style={{ fontSize: '7.5pt', color: A.muted, margin: '1px 0' }} dangerouslySetInnerHTML={{ __html: inlineRender(t) }} />;
-              })}
-            </div>
-          )}
-
-          {/* Skills as tag chips */}
-          {skillChips.length > 0 && (
-            <div>
-              <SecHeader title="Skills" />
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
-                {skillChips.map((skill, si) => (
-                  <span key={si} style={{
-                    fontSize: '6.5pt', padding: '2px 7px', borderRadius: '3px',
-                    background: '#dbeafe', color: A.accent,
-                    border: `1px solid #bfdbfe`, fontWeight: '500',
-                  }}>
-                    {skill}
-                  </span>
-                ))}
               </div>
-            </div>
-          )}
+            );
+          })}
+        </div>
 
-          {/* Languages */}
-          {languages && (
-            <div>
-              <SecHeader title="Languages" />
-              {languages.lines.filter(l => l.trim()).map((line, li) => {
-                const t = line.trim().replace(/^[-•]\s*/, '');
-                if (!t) return null;
-                return <p key={li} style={{ fontSize: '7.5pt', color: A.muted, margin: '2px 0' }}>{t}</p>;
-              })}
-            </div>
-          )}
+        {/* Professional skills */}
+        <div style={{ width: '33.33%', borderRight: BORDER, padding: '6mm 8mm' }}>
+          <GridSecHeader title="Professional" blue />
+          {skillItems.slice(0, 7).map((skill, si) => (
+            <p key={si} style={{ fontSize: '9.5pt', color: '#555', margin: '5px 0' }}>{skill}</p>
+          ))}
+        </div>
+
+        {/* Social / soft skills */}
+        <div style={{ flex: 1, padding: '6mm 8mm' }}>
+          <GridSecHeader title="Social" blue />
+          {(softSkills.length > 0 ? softSkills : skillItems.slice(5)).slice(0, 7).map((skill, si) => (
+            <p key={si} style={{ fontSize: '9.5pt', color: '#555', margin: '5px 0' }}>{skill}</p>
+          ))}
         </div>
       </div>
 
-      {/* GDPR */}
       {cv.gdpr && (
-        <div style={{ padding: '3mm 18mm 4mm', borderTop: `1px solid ${A.border}`, background: A.surface, flexShrink: 0 }}>
-          <p style={{ fontSize: '5.5pt', color: '#bbb', fontStyle: 'italic', margin: 0 }}>{cv.gdpr}</p>
+        <div style={{ padding: '4mm 8mm', flexShrink: 0 }}>
+          <p style={{ fontSize: '7pt', color: '#bbb', fontStyle: 'italic', margin: 0 }}>{cv.gdpr}</p>
         </div>
       )}
     </div>
@@ -927,7 +923,7 @@ export default function ApplyPage() {
               </svg>
             </div>
             <span style={{ fontWeight: '800', fontSize: '1rem', letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
-              Apply<span style={{ background: 'var(--gradient-brand)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>arr</span>
+              Res<span style={{ background: 'var(--gradient-brand)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>vio</span>
             </span>
             <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginLeft: '4px' }}>· CV Tailor</span>
           </a>
