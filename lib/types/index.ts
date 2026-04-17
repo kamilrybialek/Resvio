@@ -35,8 +35,10 @@ export interface UserProfile {
   baseCvPath: string; // Markdown or PDF
   baseCv?: string; // The raw text
   portfolioUrl?: string;
+  portfolio?: string;
   skills: string[];
   appliedJobs?: string[]; // IDs of applied jobs
+  photoBase64?: string; // Base64-encoded profile photo (JPEG/PNG)
   // ── Subscription ──────────────────────────────────────────────────────────
   subscription?: {
     plan: 'free' | 'starter' | 'growth' | 'pro';

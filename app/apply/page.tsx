@@ -265,7 +265,7 @@ function CvMinimal({ markdown }: { markdown: string }) {
 // Left sidebar: photo + skills + contact
 // Right main: CV label + name + content
 // ─────────────────────────────────────────────
-function CvNordic({ markdown }: { markdown: string }) {
+function CvNordic({ markdown, photo }: { markdown: string; photo?: string }) {
   const cv = parseMarkdownCv(markdown);
   const initials = cv.name.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('');
 
@@ -297,16 +297,19 @@ function CvNordic({ markdown }: { markdown: string }) {
         background: '#f6f6f6',
         borderRight: '1px solid #e8e8e8',
       }}>
-        {/* Photo / avatar placeholder */}
+        {/* Photo / avatar */}
         <div style={{
           width: '90px', height: '110px',
           background: '#d8d8d8',
           marginBottom: '20px',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: '22pt', fontWeight: '700', color: '#aaa',
-          flexShrink: 0,
+          flexShrink: 0, overflow: 'hidden',
         }}>
-          {initials}
+          {photo
+            ? <img src={photo} alt={cv.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            : initials
+          }
         </div>
 
         {/* Skill / sidebar sections */}
@@ -442,7 +445,7 @@ function CvNordic({ markdown }: { markdown: string }) {
 // RENDERER 3 — Grid (Mary Smith template)
 // Thin-border grid: header | profile | edu/exp | skills
 // ─────────────────────────────────────────────
-function CvGrid({ markdown }: { markdown: string }) {
+function CvGrid({ markdown, photo }: { markdown: string; photo?: string }) {
   const cv = parseMarkdownCv(markdown);
   const initials = cv.name.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('');
 
@@ -517,8 +520,12 @@ function CvGrid({ markdown }: { markdown: string }) {
             background: '#e4e4e4',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '22pt', fontWeight: '700', color: '#aaa',
+            overflow: 'hidden',
           }}>
-            {initials}
+            {photo
+              ? <img src={photo} alt={cv.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : initials
+            }
           </div>
         </div>
         {/* Name + bio */}
@@ -638,10 +645,10 @@ function CvGrid({ markdown }: { markdown: string }) {
 // ─────────────────────────────────────────────
 // CV Preview dispatcher
 // ─────────────────────────────────────────────
-function CvPreview({ markdown, templateId }: { markdown: string; templateId: TemplateId }) {
+function CvPreview({ markdown, templateId, photo }: { markdown: string; templateId: TemplateId; photo?: string }) {
   if (templateId === 'minimal') return <CvMinimal markdown={markdown} />;
-  if (templateId === 'grid') return <CvGrid markdown={markdown} />;
-  return <CvNordic markdown={markdown} />;
+  if (templateId === 'grid') return <CvGrid markdown={markdown} photo={photo} />;
+  return <CvNordic markdown={markdown} photo={photo} />;
 }
 
 // ─────────────────────────────────────────────
@@ -753,6 +760,8 @@ export default function ApplyPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>(DEFAULT_TEMPLATE_ID);
+  const [cvLanguage, setCvLanguage] = useState('English');
+  const [profilePhoto, setProfilePhoto] = useState('');
 
   const cvPreviewRef = useRef<HTMLDivElement>(null);
   const [cvScale, setCvScale] = useState(1);
@@ -779,6 +788,10 @@ export default function ApplyPage() {
       if (!parsed.description || parsed.description.length < 20) setShowManualPaste(true);
       analyzeJob(parsed, '');
     }
+    // Load profile photo
+    fetch('/api/profile').then(r => r.json()).then(p => {
+      if (p?.photoBase64) setProfilePhoto(p.photoBase64);
+    }).catch(() => {});
   }, []);
 
   const analyzeJob = async (j: Job, desc: string) => {
@@ -805,7 +818,7 @@ export default function ApplyPage() {
       const res = await fetch('/api/generate-cv', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ job, manualDescription: manualDesc || undefined, templateId: selectedTemplate }),
+        body: JSON.stringify({ job, manualDescription: manualDesc || undefined, templateId: selectedTemplate, targetLanguage: cvLanguage }),
       });
       const data = await res.json();
       setTailoredCv(data.error ? '# Error\n\n' + data.error : data.tailoredCv);
@@ -1077,6 +1090,27 @@ export default function ApplyPage() {
                 )}
               </div>
 
+              {/* Language selector */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', background: 'var(--bg-surface)', borderRadius: 'var(--r-md)', border: '1px solid var(--border-dim)' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                <span style={{ fontSize: 'var(--text-xs)', fontWeight: '600', color: 'var(--text-tertiary)', flexShrink: 0 }}>CV Language:</span>
+                <select
+                  value={cvLanguage}
+                  onChange={e => setCvLanguage(e.target.value)}
+                  style={{
+                    flex: 1, padding: '4px 8px', borderRadius: 'var(--r-sm)',
+                    background: 'var(--bg-elevated)', color: 'var(--text-primary)',
+                    border: '1px solid var(--border-default)',
+                    fontSize: 'var(--text-xs)', fontFamily: 'var(--font-sans)',
+                    cursor: 'pointer', outline: 'none',
+                  }}
+                >
+                  {['English','Swedish','Norwegian','Danish','German','Polish','French','Spanish','Dutch'].map(l => (
+                    <option key={l} value={l}>{l}</option>
+                  ))}
+                </select>
+              </div>
+
               {/* Generate button */}
               <button
                 onClick={generateCv}
@@ -1140,7 +1174,7 @@ export default function ApplyPage() {
                     boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
                   }}>
                     <div style={{ transform: `scale(${cvScale})`, transformOrigin: 'top left', width: '210mm', height: '297mm' }}>
-                      <CvPreview markdown={tailoredCv} templateId={selectedTemplate} />
+                      <CvPreview markdown={tailoredCv} templateId={selectedTemplate} photo={profilePhoto || undefined} />
                     </div>
                   </div>
                 </div>
@@ -1166,7 +1200,7 @@ export default function ApplyPage() {
 
       {/* ── Print-only container ── */}
       <div className="print-cv-container" style={{ display: 'none' }}>
-        {tailoredCv && <CvPreview markdown={tailoredCv} templateId={selectedTemplate} />}
+        {tailoredCv && <CvPreview markdown={tailoredCv} templateId={selectedTemplate} photo={profilePhoto || undefined} />}
       </div>
     </>
   );

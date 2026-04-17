@@ -6,24 +6,46 @@ import Anthropic from '@anthropic-ai/sdk';
 
 const MAX_JOBS = 15;
 
+// ── Premium gate ────────────────────────────────────────────────────────────
+// Set to true when payment integration is live to restrict AI scoring to
+// paid subscribers. Until then, scoring is available to all users.
+const AI_SCORING_PREMIUM_ONLY = false;
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const jobs: Job[] = Array.isArray(body.jobs) ? body.jobs.slice(0, MAX_JOBS) : [];
+
+    // Premium gate (activate when subscriptions go live)
+    if (AI_SCORING_PREMIUM_ONLY) {
+      const profile = ProfileService.getProfile();
+      const plan = profile?.subscription?.plan ?? 'free';
+      if (plan === 'free') {
+        return NextResponse.json({
+          scores: {},
+          error: 'premium_required',
+          message: 'AI match scoring requires a paid plan. Upgrade to Growth or Pro.',
+        }, { status: 403 });
+      }
+    }
 
     if (jobs.length === 0) {
       return NextResponse.json({ scores: {} });
     }
 
     const profile = ProfileService.getProfile();
-    const baseCv = profile?.baseCv?.trim();
+    const baseCv = (profile?.baseCv || profile?.baseCvPath || '').trim();
+    const skills = Array.isArray(profile?.skills) && profile.skills.length > 0
+      ? profile.skills.join(', ')
+      : '';
 
-    if (!baseCv) {
+    // Need at least a CV or skill list to score
+    if (!baseCv && !skills) {
       return NextResponse.json({ scores: {} });
     }
 
     // Use CV excerpt (skills + recent experience) — full CV wastes tokens in batch mode
-    const cvExcerpt = baseCv.slice(0, 2500);
+    const cvExcerpt = baseCv ? baseCv.slice(0, 2500) : `Skills: ${skills}`;
 
     const jobListText = jobs
       .map(j => `[${j.id}] ${j.title} @ ${j.company}${j.location ? ` (${j.location})` : ''}: ${(j.description || j.title).slice(0, 250)}`)

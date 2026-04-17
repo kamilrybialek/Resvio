@@ -51,22 +51,45 @@ export class LinkedInScraper {
       
       await page.goto(url, { waitUntil: 'load', timeout: 15000 });
       
-      // The public jobs page often loads results in an unordered list
-      try {
-        await page.waitForSelector('.base-search-card', { timeout: 5000 });
-      } catch (e) {
-        console.warn('LinkedIn Scraper: Could not find .base-search-card. Showing zero results or IP blocked.');
+      // Try multiple selector patterns — LinkedIn changes its HTML periodically
+      const cardSelector = await Promise.race([
+        page.waitForSelector('.base-search-card',      { timeout: 4000 }).then(() => '.base-search-card'),
+        page.waitForSelector('.job-search-card',       { timeout: 4000 }).then(() => '.job-search-card'),
+        page.waitForSelector('[data-entity-urn]',      { timeout: 4000 }).then(() => '[data-entity-urn]'),
+        page.waitForSelector('li.jobs-search-results__list-item', { timeout: 4000 }).then(() => 'li.jobs-search-results__list-item'),
+      ]).catch(() => null);
+
+      if (!cardSelector) {
+        console.warn('LinkedIn Scraper: No job cards found — possible IP block or layout change.');
         return [];
       }
 
-      const jobs = await page.evaluate(() => {
-        const cards = Array.from(document.querySelectorAll('.base-search-card'));
+      const jobs = await page.evaluate((selector: string) => {
+        const cards = Array.from(document.querySelectorAll(selector));
         return cards.slice(0, 10).map(card => {
-          const titleEl = card.querySelector('.base-search-card__title');
-          const companyEl = card.querySelector('.base-search-card__subtitle');
-          const locationEl = card.querySelector('.job-search-card__location');
-          const urlEl = card.querySelector('a.base-card__full-link') as HTMLAnchorElement;
-          
+          // Title: try multiple selectors
+          const titleEl = card.querySelector('.base-search-card__title')
+            || card.querySelector('h3.job-search-card__title')
+            || card.querySelector('[class*="title"]')
+            || card.querySelector('h3, h4');
+
+          // Company: try multiple
+          const companyEl = card.querySelector('.base-search-card__subtitle')
+            || card.querySelector('h4.base-search-card__subtitle')
+            || card.querySelector('[class*="company"]')
+            || card.querySelector('h4, h5');
+
+          // Location
+          const locationEl = card.querySelector('.job-search-card__location')
+            || card.querySelector('[class*="location"]')
+            || card.querySelector('span[class*="location"]');
+
+          // URL
+          const urlEl = (card.querySelector('a.base-card__full-link')
+            || card.querySelector('a[href*="/jobs/view/"]')
+            || card.querySelector('a[href*="linkedin.com/jobs"]')
+            || card.querySelector('a')) as HTMLAnchorElement | null;
+
           return {
             id: `li-${Math.random().toString(36).substr(2, 9)}`,
             source: 'LinkedIn' as const,
@@ -74,12 +97,12 @@ export class LinkedInScraper {
             company: companyEl?.textContent?.trim() || 'Unknown Company',
             location: locationEl?.textContent?.trim() || 'Unknown Location',
             description: 'Description available upon viewing the offer.',
-            url: urlEl?.href?.split('?')[0] || '', // Clean URL
+            url: urlEl?.href?.split('?')[0] || '',
             postedAt: new Date().toISOString().split('T')[0],
-            logo: '' // LinkedIn public logos are often lazy-loaded via complex data tags
+            logo: '',
           };
-        });
-      });
+        }).filter(j => j.title !== 'Unknown' && j.url);
+      }, cardSelector);
 
       return jobs;
     } catch (error) {

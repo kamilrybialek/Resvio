@@ -5,6 +5,7 @@ import Sidebar from '../components/Sidebar';
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState({ name: '', email: '', phone: '', baseCv: '', portfolio: '', skills: [] as string[] });
+  const [photoBase64, setPhotoBase64] = useState('');
   const [skillInput, setSkillInput] = useState('');
   const [isSaving, setIsSaving]     = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -22,8 +23,21 @@ export default function ProfilePage() {
           skills: Array.isArray(data.skills) ? data.skills : [],
         });
       }
+      if (data?.photoBase64) setPhotoBase64(data.photoBase64);
     });
   }, []);
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const b64 = ev.target?.result as string;
+      setPhotoBase64(b64);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -31,7 +45,7 @@ export default function ProfilePage() {
       await fetch('/api/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profile),
+        body: JSON.stringify({ ...profile, photoBase64 }),
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
@@ -163,6 +177,41 @@ export default function ProfilePage() {
                   </svg>
                 </div>
                 <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: '800', color: 'var(--text-primary)' }}>Personal Details</h2>
+              </div>
+
+              {/* Photo upload */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '22px', padding: '16px', background: 'var(--bg-surface)', borderRadius: 'var(--r-lg)', border: '1px solid var(--border-dim)' }}>
+                <div style={{ position: 'relative', flexShrink: 0 }}>
+                  <div style={{
+                    width: '72px', height: '72px', borderRadius: '50%',
+                    background: photoBase64 ? 'transparent' : 'var(--accent-dim)',
+                    border: photoBase64 ? '2px solid var(--border-accent)' : '2px dashed var(--border-accent)',
+                    overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    {photoBase64
+                      ? <img src={photoBase64} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    }
+                  </div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontWeight: '700', fontSize: 'var(--text-sm)', color: 'var(--text-primary)', marginBottom: '4px' }}>Profile Photo</p>
+                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginBottom: '10px', lineHeight: 1.5 }}>
+                    Used in Nordic Premium and Atlas CV templates. JPEG or PNG, max 5 MB.
+                  </p>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <label htmlFor="photo-upload" className="cv-toolbar-btn" style={{ cursor: 'pointer' }}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                      {photoBase64 ? 'Replace Photo' : 'Upload Photo'}
+                    </label>
+                    {photoBase64 && (
+                      <button className="cv-toolbar-btn" onClick={() => setPhotoBase64('')} style={{ color: 'var(--text-danger)', borderColor: 'rgba(248,113,113,0.3)' }}>
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  <input id="photo-upload" type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }} onChange={handlePhotoUpload} />
+                </div>
               </div>
 
               <div className="profile-form-grid">

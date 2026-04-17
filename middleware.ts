@@ -26,8 +26,7 @@ function isPublicPath(pathname: string): boolean {
 
 /** Valid username → password pairs for HTTP Basic Auth gate. */
 const BASIC_AUTH_USERS: Record<string, string> = {
-  admin:   '2WJFRE12wjfre1',
-  Fredrik: 'test123',
+  admin: '2WJFRE12wjfre1',
 };
 
 function requireBasicAuth(req: NextRequest): NextResponse | null {
@@ -38,7 +37,6 @@ function requireBasicAuth(req: NextRequest): NextResponse | null {
     const [user, pwd] = atob(authValue).split(':');
 
     if (BASIC_AUTH_USERS[user] === pwd) {
-      // Credentials valid — allow the request through
       return null;
     }
 
@@ -48,12 +46,9 @@ function requireBasicAuth(req: NextRequest): NextResponse | null {
     }
   }
 
-  // Credentials missing or wrong — issue a Basic-auth challenge
   return new NextResponse('Auth required', {
     status: 401,
-    headers: {
-      'WWW-Authenticate': 'Basic realm="Resvio"',
-    },
+    headers: { 'WWW-Authenticate': 'Basic realm="Resvio"' },
   });
 }
 

@@ -1089,6 +1089,243 @@ export default function LandingPage() {
           margin: 0 24px;
         }
 
+        /* ─── FEATURE SHOWCASE MOCKUPS ─── */
+        .feature-showcase {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 32px;
+          align-items: center;
+          margin-bottom: 80px;
+        }
+
+        .feature-showcase.reverse {
+          direction: rtl;
+        }
+
+        .feature-showcase.reverse > * {
+          direction: ltr;
+        }
+
+        @media (max-width: 768px) {
+          .feature-showcase, .feature-showcase.reverse {
+            grid-template-columns: 1fr;
+            direction: ltr;
+          }
+        }
+
+        .showcase-text h3 {
+          font-size: clamp(22px, 3vw, 30px);
+          font-weight: 800;
+          color: #fff;
+          letter-spacing: -0.8px;
+          margin-bottom: 14px;
+          line-height: 1.2;
+        }
+
+        .showcase-text p {
+          font-size: 16px;
+          color: var(--text-muted);
+          line-height: 1.7;
+          margin-bottom: 20px;
+        }
+
+        .showcase-bullets {
+          list-style: none;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .showcase-bullets li {
+          font-size: 15px;
+          color: var(--text-muted);
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .showcase-bullets li::before {
+          content: '';
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: rgba(99,102,241,0.15);
+          border: 1px solid rgba(99,102,241,0.4);
+          display: block;
+          flex-shrink: 0;
+          background-image: url("data:image/svg+xml,%3Csvg width='10' height='8' viewBox='0 0 10 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 4L3.5 6.5L9 1' stroke='%236366f1' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: center;
+        }
+
+        .mock-screen {
+          background: #111118;
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+        }
+
+        .mock-screen-bar {
+          background: #1a1a27;
+          padding: 10px 14px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .mock-screen-body {
+          padding: 18px;
+        }
+
+        /* CV mock styles */
+        .mock-cv-page {
+          background: #fff;
+          border-radius: 6px;
+          padding: 16px;
+          min-height: 220px;
+          font-size: 11px;
+          color: #333;
+          line-height: 1.5;
+        }
+
+        .mock-cv-name {
+          font-size: 16px;
+          font-weight: 800;
+          color: #111;
+          margin-bottom: 2px;
+        }
+
+        .mock-cv-role {
+          font-size: 10px;
+          color: #888;
+          margin-bottom: 12px;
+        }
+
+        .mock-cv-section {
+          margin-bottom: 10px;
+        }
+
+        .mock-cv-section-title {
+          font-size: 8px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: #555;
+          border-bottom: 1px solid #e0e0e0;
+          padding-bottom: 3px;
+          margin-bottom: 6px;
+        }
+
+        .mock-cv-line {
+          height: 6px;
+          background: #f0f0f0;
+          border-radius: 3px;
+          margin-bottom: 4px;
+        }
+
+        .mock-cv-line.dark { background: #333; }
+        .mock-cv-line.med { background: #888; }
+        .mock-cv-line.accent { background: rgba(99,102,241,0.5); }
+
+        /* Tracker mock */
+        .mock-tracker-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 9px 12px;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.06);
+          border-radius: 8px;
+          margin-bottom: 6px;
+        }
+
+        .mock-tracker-company {
+          width: 28px;
+          height: 28px;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 11px;
+          font-weight: 800;
+          color: #fff;
+          flex-shrink: 0;
+        }
+
+        .mock-tracker-info {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .mock-tracker-title {
+          font-size: 11px;
+          font-weight: 600;
+          color: var(--text);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .mock-tracker-date {
+          font-size: 10px;
+          color: var(--text-faint);
+        }
+
+        .mock-status-pill {
+          font-size: 10px;
+          font-weight: 600;
+          padding: 3px 9px;
+          border-radius: 100px;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+
+        .status-applied { background: rgba(99,102,241,0.15); color: #818cf8; }
+        .status-interview { background: rgba(45,212,191,0.15); color: #2dd4bf; }
+        .status-offer { background: rgba(245,158,11,0.15); color: #f59e0b; }
+
+        /* ─── COUNTRY FLAGS STRIP ─── */
+        .countries-strip {
+          padding: 32px 0;
+          text-align: center;
+          border-top: 1px solid var(--border);
+          border-bottom: 1px solid var(--border);
+          background: rgba(255,255,255,0.01);
+        }
+
+        .countries-strip-label {
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          color: var(--text-faint);
+          margin-bottom: 16px;
+        }
+
+        .countries-flags {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 24px;
+          flex-wrap: wrap;
+          padding: 0 24px;
+        }
+
+        .country-item {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          font-size: 13px;
+          font-weight: 500;
+          color: var(--text-muted);
+        }
+
+        .country-item span:first-child {
+          font-size: 20px;
+        }
+
         /* ─── MOBILE NAV ─── */
         @media (max-width: 640px) {
           .nav-links { display: none; }
@@ -1103,6 +1340,11 @@ export default function LandingPage() {
           .pricing-card.featured { transform: none; }
           .step-item { padding: 0 16px; }
           .cta-inner { padding: 48px 24px; }
+          .browser-mockup { border-radius: 12px; }
+          .browser-body { padding: 14px; min-height: 260px; }
+          .mock-search-bar { flex-direction: column; }
+          .mock-search-btn { justify-content: center; }
+          .mock-job-meta { flex-wrap: wrap; gap: 4px; }
         }
       `}</style>
 
@@ -1137,20 +1379,20 @@ export default function LandingPage() {
         <div className="hero-inner">
           <div className="hero-badge">
             <div className="hero-badge-dot" />
-            Now searching 10+ European job boards
+            🇪🇺 &nbsp;Searching 10+ European job boards
           </div>
 
           <h1>
-            Find your next role <strong>faster</strong>,<br />with AI
+            Land your next job<br /><strong>across Europe</strong>
           </h1>
 
           <p className="hero-sub">
-            Resvio searches LinkedIn, Indeed, JustJoinIT, and 10+ job boards simultaneously.
-            AI tailors your CV and writes cover letters for every application.
+            One search covers LinkedIn, Indeed, JustJoinIT, and 10+ job boards across Sweden, Poland, Germany and beyond.
+            AI tailors your CV and writes cover letters — in the right language — for every application.
           </p>
 
           <div className="hero-ctas">
-            <a href="/search" className="btn btn-primary btn-lg">Start for free</a>
+            <a href="/search" className="btn btn-primary btn-lg">Start free — no card needed</a>
             <a href="#features" className="btn btn-outline btn-lg">See how it works →</a>
           </div>
 
@@ -1233,101 +1475,265 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <div className="divider" />
+      {/* COUNTRIES STRIP */}
+      <div className="countries-strip">
+        <div className="countries-strip-label">Active job markets</div>
+        <div className="countries-flags">
+          <div className="country-item"><span>🇸🇪</span><span>Sweden</span></div>
+          <div className="country-item"><span>🇵🇱</span><span>Poland</span></div>
+          <div className="country-item"><span>🇩🇪</span><span>Germany</span></div>
+          <div className="country-item"><span>🇳🇴</span><span>Norway</span></div>
+          <div className="country-item"><span>🇩🇰</span><span>Denmark</span></div>
+          <div className="country-item"><span>🇳🇱</span><span>Netherlands</span></div>
+          <div className="country-item"><span>🇬🇧</span><span>UK</span></div>
+          <div className="country-item"><span>🇨🇿</span><span>Czech Rep.</span></div>
+        </div>
+      </div>
 
       {/* FEATURES */}
       <section className="section" id="features">
         <div className="section-header">
           <div className="section-tag">Features</div>
-          <h2 className="section-title">Everything you need to<br />land the job</h2>
-          <p className="section-sub">Built for serious job seekers across Europe. One platform, every market.</p>
+          <h2 className="section-title">Everything you need to<br />get hired in Europe</h2>
+          <p className="section-sub">Built for serious job seekers navigating multiple markets and languages. One tool, every edge.</p>
         </div>
 
         <div className="features-grid">
           {/* Feature 1 */}
           <div className="feature-card">
             <div className="feature-icon">
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="11" cy="11" r="8" stroke="#818cf8" strokeWidth="1.5"/>
-                <path d="M3 11H19" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round"/>
-                <path d="M11 3C11 3 8 7 8 11C8 15 11 19 11 19" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round"/>
-                <path d="M11 3C11 3 14 7 14 11C14 15 11 19 11 19" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#818cf8" strokeWidth="1.5"/><path d="M3 11H19" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round"/><path d="M11 3C11 3 8 7 8 11C8 15 11 19 11 19" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round"/><path d="M11 3C11 3 14 7 14 11C14 15 11 19 11 19" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round"/></svg>
             </div>
             <h3>Multi-market search</h3>
-            <p>5 European markets, 10+ job boards in a single search. LinkedIn, Indeed, JustJoinIT, Pracuj, Arbetsförmedlingen and more.</p>
+            <p>8 European markets, 10+ job boards in a single search — LinkedIn, Indeed, JustJoinIT, Pracuj, Arbetsförmedlingen, StepStone, and more. No switching tabs.</p>
           </div>
 
           {/* Feature 2 */}
           <div className="feature-card">
             <div className="feature-icon">
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M11 2L13.5 8.5L20 9.3L15.5 13.5L16.9 20L11 16.8L5.1 20L6.5 13.5L2 9.3L8.5 8.5L11 2Z" stroke="#818cf8" strokeWidth="1.5" strokeLinejoin="round"/>
-              </svg>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2L13.5 8.5L20 9.3L15.5 13.5L16.9 20L11 16.8L5.1 20L6.5 13.5L2 9.3L8.5 8.5L11 2Z" stroke="#818cf8" strokeWidth="1.5" strokeLinejoin="round"/></svg>
             </div>
             <h3>AI match scoring</h3>
-            <p>Every job scored against your profile. Focus only on positions where you have 75%+ compatibility. No more guessing.</p>
+            <p>Every job scored 0–100% against your skills and experience. Stop wasting applications on poor fits — focus only on roles where you genuinely have a strong chance.</p>
           </div>
 
           {/* Feature 3 */}
           <div className="feature-card">
             <div className="feature-icon">
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="3" y="2" width="16" height="18" rx="3" stroke="#818cf8" strokeWidth="1.5"/>
-                <path d="M7 7H15" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round"/>
-                <path d="M7 11H15" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round"/>
-                <path d="M7 15H11" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round"/>
-                <circle cx="16" cy="16" r="4" fill="#0d0d14" stroke="#818cf8" strokeWidth="1.5"/>
-                <path d="M14.5 16L15.5 17L17.5 15" stroke="#818cf8" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="2" width="16" height="18" rx="3" stroke="#818cf8" strokeWidth="1.5"/><path d="M7 7H15" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round"/><path d="M7 11H15" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round"/><path d="M7 15H11" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round"/><circle cx="16" cy="16" r="4" fill="#0d0d14" stroke="#818cf8" strokeWidth="1.5"/><path d="M14.5 16L15.5 17L17.5 15" stroke="#818cf8" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
-            <h3>CV tailoring</h3>
-            <p>One-click AI tailoring adapts your CV to each job description. Highlight the right skills, use the right keywords.</p>
+            <h3>One-click CV tailoring</h3>
+            <p>Paste the job description, click Generate. AI rewrites your CV to match — correct keywords, right emphasis, ATS-optimised. Download as a clean PDF in seconds.</p>
           </div>
 
           {/* Feature 4 */}
           <div className="feature-card">
             <div className="feature-icon">
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M4 4H18C19.1 4 20 4.9 20 6V14C20 15.1 19.1 16 18 16H12L8 20V16H4C2.9 16 2 15.1 2 14V6C2 4.9 2.9 4 4 4Z" stroke="#818cf8" strokeWidth="1.5" strokeLinejoin="round"/>
-                <path d="M7 9H15" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round"/>
-                <path d="M7 12H12" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 4H18C19.1 4 20 4.9 20 6V14C20 15.1 19.1 16 18 16H12L8 20V16H4C2.9 16 2 15.1 2 14V6C2 4.9 2.9 4 4 4Z" stroke="#818cf8" strokeWidth="1.5" strokeLinejoin="round"/><path d="M7 9H15" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round"/><path d="M7 12H12" stroke="#818cf8" strokeWidth="1.5" strokeLinecap="round"/></svg>
             </div>
-            <h3>Cover letters</h3>
-            <p>AI writes persuasive cover letters in the right language — English, Polish, Swedish, or German — matching company tone.</p>
+            <h3>Multilingual cover letters</h3>
+            <p>AI writes persuasive, personalised cover letters in English, Polish, Swedish, German, or Norwegian — matching the tone and language of the company you're applying to.</p>
           </div>
 
           {/* Feature 5 */}
           <div className="feature-card">
             <div className="feature-icon">
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="2" y="3" width="18" height="16" rx="3" stroke="#818cf8" strokeWidth="1.5"/>
-                <path d="M2 8H20" stroke="#818cf8" strokeWidth="1.5"/>
-                <path d="M7 3V8" stroke="#818cf8" strokeWidth="1.5"/>
-                <path d="M15 3V8" stroke="#818cf8" strokeWidth="1.5"/>
-                <circle cx="7" cy="13" r="1.5" fill="#818cf8"/>
-                <circle cx="11" cy="13" r="1.5" fill="#818cf8" fillOpacity="0.4"/>
-                <circle cx="15" cy="13" r="1.5" fill="#818cf8" fillOpacity="0.2"/>
-              </svg>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="3" width="18" height="16" rx="3" stroke="#818cf8" strokeWidth="1.5"/><path d="M2 8H20" stroke="#818cf8" strokeWidth="1.5"/><path d="M7 3V8" stroke="#818cf8" strokeWidth="1.5"/><path d="M15 3V8" stroke="#818cf8" strokeWidth="1.5"/><circle cx="7" cy="13" r="1.5" fill="#818cf8"/><circle cx="11" cy="13" r="1.5" fill="#818cf8" fillOpacity="0.4"/><circle cx="15" cy="13" r="1.5" fill="#818cf8" fillOpacity="0.2"/></svg>
             </div>
             <h3>Application tracker</h3>
-            <p>Track every application in one place. Know what you applied to, when, and what stage each is at. Never lose a lead.</p>
+            <p>Track every application in one kanban view — Applied, Interview, Offer, Rejected. Never lose track of where you are with each company. Follow up at the right moment.</p>
           </div>
 
           {/* Feature 6 */}
           <div className="feature-card">
             <div className="feature-icon">
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="2" y="7" width="18" height="11" rx="3" stroke="#818cf8" strokeWidth="1.5"/>
-                <path d="M7 7V5C7 3.9 7.9 3 9 3H13C14.1 3 15 3.9 15 5V7" stroke="#818cf8" strokeWidth="1.5"/>
-                <circle cx="11" cy="13" r="2" stroke="#818cf8" strokeWidth="1.5"/>
-              </svg>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="7" width="18" height="11" rx="3" stroke="#818cf8" strokeWidth="1.5"/><path d="M7 7V5C7 3.9 7.9 3 9 3H13C14.1 3 15 3.9 15 5V7" stroke="#818cf8" strokeWidth="1.5"/><circle cx="11" cy="13" r="2" stroke="#818cf8" strokeWidth="1.5"/></svg>
             </div>
-            <h3>Remote-first</h3>
-            <p>Dedicated remote search across all markets simultaneously. Find the best remote roles across Europe without the commute.</p>
+            <h3>Remote & hybrid filters</h3>
+            <p>Dedicated remote-first filters across all markets at once. Find the best fully remote or hybrid roles in Europe — sorted by match score, not posting date.</p>
           </div>
         </div>
+      </section>
+
+      {/* FEATURE SHOWCASES */}
+      <section className="section" style={{paddingTop: '32px'}}>
+
+        {/* Showcase 1: Job search */}
+        <div className="feature-showcase">
+          <div className="showcase-text">
+            <div className="section-tag" style={{textAlign:'left', display:'block', marginBottom:'12px'}}>Search</div>
+            <h3>One search,<br />every market</h3>
+            <p>Stop opening 8 tabs. Resvio runs parallel searches across LinkedIn, Indeed, JustJoinIT, Pracuj and more — returning ranked, de-duplicated results in seconds.</p>
+            <ul className="showcase-bullets">
+              <li>Results scored against your profile in real time</li>
+              <li>Filter by country, language, salary, remote/hybrid</li>
+              <li>Saved searches run automatically each morning</li>
+            </ul>
+          </div>
+          <div className="mock-screen">
+            <div className="mock-screen-bar">
+              <div className="browser-dots"><div className="browser-dot"/><div className="browser-dot"/><div className="browser-dot"/></div>
+              <div className="browser-url"><span className="browser-url-lock">🔒</span>app.resvio.online/search</div>
+            </div>
+            <div className="mock-screen-body">
+              <div className="mock-search-bar">
+                <div className="mock-input"><span className="mock-input-icon">🔍</span>Frontend Engineer · Remote · Europe</div>
+                <div className="mock-search-btn">Search All</div>
+              </div>
+              <div className="mock-filters">
+                <div className="mock-filter-tag active">🇸🇪 Sweden</div>
+                <div className="mock-filter-tag active">🇵🇱 Poland</div>
+                <div className="mock-filter-tag active">Remote</div>
+                <div className="mock-filter-tag">🇩🇪 Germany</div>
+                <div className="mock-filter-tag active">Match 75%+</div>
+              </div>
+              <div className="mock-jobs">
+                <div className="mock-job-card">
+                  <div className="mock-company-logo" style={{background:'linear-gradient(135deg,#6366f1,#4f46e5)'}}>S</div>
+                  <div className="mock-job-info">
+                    <div className="mock-job-title">Senior Frontend Engineer</div>
+                    <div className="mock-job-meta"><span>Spotify · Stockholm</span><span>2h ago</span></div>
+                  </div>
+                  <div className="mock-score-badge score-high">94%</div>
+                  <div className="mock-source">LinkedIn</div>
+                </div>
+                <div className="mock-job-card">
+                  <div className="mock-company-logo" style={{background:'linear-gradient(135deg,#ec4899,#db2777)'}}>A</div>
+                  <div className="mock-job-info">
+                    <div className="mock-job-title">React Developer · Remote</div>
+                    <div className="mock-job-meta"><span>Allegro · Warsaw</span><span>5h ago</span></div>
+                  </div>
+                  <div className="mock-score-badge score-high">87%</div>
+                  <div className="mock-source">JustJoinIT</div>
+                </div>
+                <div className="mock-job-card">
+                  <div className="mock-company-logo" style={{background:'linear-gradient(135deg,#0ea5e9,#0284c7)'}}>K</div>
+                  <div className="mock-job-info">
+                    <div className="mock-job-title">Mid Frontend · React</div>
+                    <div className="mock-job-meta"><span>Klarna · Remote</span><span>1d ago</span></div>
+                  </div>
+                  <div className="mock-score-badge score-med">79%</div>
+                  <div className="mock-source">Indeed</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Showcase 2: CV generator */}
+        <div className="feature-showcase reverse">
+          <div className="showcase-text">
+            <div className="section-tag" style={{textAlign:'left', display:'block', marginBottom:'12px'}}>CV Generator</div>
+            <h3>Your CV,<br />tailored in seconds</h3>
+            <p>Paste the job description. Resvio rewrites your CV to match — highlighting the right experience, using the exact keywords recruiters and ATS systems look for.</p>
+            <ul className="showcase-bullets">
+              <li>3 professional CV templates included</li>
+              <li>Export as pixel-perfect PDF instantly</li>
+              <li>Keyword optimisation for ATS systems</li>
+              <li>Works in English, Polish, Swedish, German</li>
+            </ul>
+          </div>
+          <div className="mock-screen">
+            <div className="mock-screen-bar">
+              <div className="browser-dots"><div className="browser-dot"/><div className="browser-dot"/><div className="browser-dot"/></div>
+              <div className="browser-url"><span className="browser-url-lock">🔒</span>app.resvio.online/apply</div>
+            </div>
+            <div className="mock-screen-body" style={{background:'#0d0d14'}}>
+              <div style={{display:'flex', gap:'12px', alignItems:'flex-start'}}>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:'10px',fontWeight:700,color:'var(--text-faint)',marginBottom:'8px',textTransform:'uppercase',letterSpacing:'0.1em'}}>Job Description</div>
+                  <div style={{background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:'8px',padding:'12px',fontSize:'11px',color:'var(--text-muted)',lineHeight:1.6,minHeight:'80px'}}>
+                    We are looking for a Senior React Developer with 4+ years of experience in TypeScript, Next.js and REST APIs...
+                  </div>
+                  <div style={{marginTop:'10px',background:'linear-gradient(135deg,#6366f1,#4f46e5)',borderRadius:'8px',padding:'10px',textAlign:'center',fontSize:'12px',fontWeight:700,color:'#fff'}}>
+                    ✨ Generate tailored CV
+                  </div>
+                </div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:'10px',fontWeight:700,color:'var(--text-faint)',marginBottom:'8px',textTransform:'uppercase',letterSpacing:'0.1em'}}>Preview</div>
+                  <div className="mock-cv-page">
+                    <div className="mock-cv-name">Anna Kowalski</div>
+                    <div className="mock-cv-role">Senior React Developer</div>
+                    <div className="mock-cv-section">
+                      <div className="mock-cv-section-title">Experience</div>
+                      <div className="mock-cv-line dark" style={{width:'75%'}}/>
+                      <div className="mock-cv-line med" style={{width:'55%'}}/>
+                      <div className="mock-cv-line" style={{width:'90%'}}/>
+                      <div className="mock-cv-line" style={{width:'80%'}}/>
+                    </div>
+                    <div className="mock-cv-section">
+                      <div className="mock-cv-section-title">Skills</div>
+                      <div className="mock-cv-line accent" style={{width:'60%'}}/>
+                      <div className="mock-cv-line" style={{width:'70%'}}/>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Showcase 3: Tracker */}
+        <div className="feature-showcase">
+          <div className="showcase-text">
+            <div className="section-tag" style={{textAlign:'left', display:'block', marginBottom:'12px'}}>Tracker</div>
+            <h3>Never lose track<br />of an application</h3>
+            <p>Every job you apply to is automatically logged. See at a glance where you stand — from Applied to Interview to Offer. Know exactly when to follow up.</p>
+            <ul className="showcase-bullets">
+              <li>Automatic logging when you apply through Resvio</li>
+              <li>Status board: Applied → Interview → Offer</li>
+              <li>Notes and follow-up reminders per application</li>
+            </ul>
+          </div>
+          <div className="mock-screen">
+            <div className="mock-screen-bar">
+              <div className="browser-dots"><div className="browser-dot"/><div className="browser-dot"/><div className="browser-dot"/></div>
+              <div className="browser-url"><span className="browser-url-lock">🔒</span>app.resvio.online/tracker</div>
+            </div>
+            <div className="mock-screen-body">
+              <div style={{display:'flex',gap:'8px',marginBottom:'14px'}}>
+                {['All (12)', 'Applied (7)', 'Interview (3)', 'Offer (1)'].map((t,i) => (
+                  <div key={i} style={{padding:'5px 11px',borderRadius:'100px',fontSize:'11px',fontWeight:600,background:i===0?'rgba(99,102,241,0.15)':'rgba(255,255,255,0.04)',border:i===0?'1px solid rgba(99,102,241,0.4)':'1px solid rgba(255,255,255,0.08)',color:i===0?'var(--accent3)':'var(--text-faint)'}}>
+                    {t}
+                  </div>
+                ))}
+              </div>
+              <div className="mock-tracker-row">
+                <div className="mock-tracker-company" style={{background:'linear-gradient(135deg,#2dd4bf,#0d9488)'}}>S</div>
+                <div className="mock-tracker-info">
+                  <div className="mock-tracker-title">Senior Frontend Engineer · Spotify</div>
+                  <div className="mock-tracker-date">Applied Apr 14 · LinkedIn</div>
+                </div>
+                <div className="mock-status-pill status-interview">Interview →</div>
+              </div>
+              <div className="mock-tracker-row">
+                <div className="mock-tracker-company" style={{background:'linear-gradient(135deg,#f59e0b,#d97706)'}}>V</div>
+                <div className="mock-tracker-info">
+                  <div className="mock-tracker-title">React Developer · Vinted</div>
+                  <div className="mock-tracker-date">Applied Apr 12 · JustJoinIT</div>
+                </div>
+                <div className="mock-status-pill status-offer">Offer 🎉</div>
+              </div>
+              <div className="mock-tracker-row">
+                <div className="mock-tracker-company" style={{background:'linear-gradient(135deg,#6366f1,#4f46e5)'}}>K</div>
+                <div className="mock-tracker-info">
+                  <div className="mock-tracker-title">Frontend Lead · Klarna</div>
+                  <div className="mock-tracker-date">Applied Apr 16 · Indeed</div>
+                </div>
+                <div className="mock-status-pill status-applied">Applied</div>
+              </div>
+              <div className="mock-tracker-row">
+                <div className="mock-tracker-company" style={{background:'linear-gradient(135deg,#ec4899,#db2777)'}}>A</div>
+                <div className="mock-tracker-info">
+                  <div className="mock-tracker-title">Mid React Eng · Allegro</div>
+                  <div className="mock-tracker-date">Applied Apr 10 · Pracuj.pl</div>
+                </div>
+                <div className="mock-status-pill status-applied">Applied</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </section>
 
       <div className="divider" />
@@ -1376,9 +1782,9 @@ export default function LandingPage() {
           {/* Pack 10 */}
           <div className="pricing-card">
             <div className="pricing-plan">Starter Pack</div>
-            <div className="pricing-price">39 <span>kr</span></div>
-            <div style={{fontSize:'12px',color:'var(--text-muted)',marginTop:'-8px',marginBottom:'16px'}}>4.9 kr per CV</div>
-            <p className="pricing-desc">Perfect for a focused job search sprint</p>
+            <div className="pricing-price">€3<span>.99</span></div>
+            <div style={{fontSize:'12px',color:'var(--text-muted)',marginTop:'-8px',marginBottom:'16px'}}>€0.40 per CV · one-time payment</div>
+            <p className="pricing-desc">Perfect for a focused, short job search sprint</p>
             <ul className="pricing-features">
               <li>10 AI-tailored CVs</li>
               <li>10 cover letters</li>
@@ -1386,15 +1792,15 @@ export default function LandingPage() {
               <li>AI match scoring</li>
               <li>Credits never expire</li>
             </ul>
-            <a href="/search" className="pricing-btn pricing-btn-secondary">Buy Starter Pack</a>
+            <a href="/search" className="pricing-btn pricing-btn-secondary">Get Starter Pack</a>
           </div>
 
           {/* Pack 30 — Featured */}
           <div className="pricing-card featured">
-            <div className="pricing-badge">⭐ Best Value</div>
+            <div className="pricing-badge">⭐ Most Popular</div>
             <div className="pricing-plan">Growth Pack</div>
-            <div className="pricing-price">89 <span>kr</span></div>
-            <div style={{fontSize:'12px',color:'var(--teal)',marginTop:'-8px',marginBottom:'16px',fontWeight:600}}>3.0 kr per CV · save 39%</div>
+            <div className="pricing-price">€8<span>.99</span></div>
+            <div style={{fontSize:'12px',color:'var(--teal)',marginTop:'-8px',marginBottom:'16px',fontWeight:600}}>€0.30 per CV · save 25%</div>
             <p className="pricing-desc">For serious job seekers applying across multiple markets</p>
             <ul className="pricing-features">
               <li>30 AI-tailored CVs</li>
@@ -1404,14 +1810,14 @@ export default function LandingPage() {
               <li>Priority support</li>
               <li>Credits never expire</li>
             </ul>
-            <a href="/search" className="pricing-btn pricing-btn-primary">Buy Growth Pack →</a>
+            <a href="/search" className="pricing-btn pricing-btn-primary">Get Growth Pack →</a>
           </div>
 
           {/* Pack 50 */}
           <div className="pricing-card">
             <div className="pricing-plan">Pro Pack</div>
-            <div className="pricing-price">129 <span>kr</span></div>
-            <div style={{fontSize:'12px',color:'var(--text-muted)',marginTop:'-8px',marginBottom:'16px'}}>2.6 kr per CV · save 47%</div>
+            <div className="pricing-price">€12<span>.99</span></div>
+            <div style={{fontSize:'12px',color:'var(--text-muted)',marginTop:'-8px',marginBottom:'16px'}}>€0.26 per CV · save 35%</div>
             <p className="pricing-desc">Maximum firepower for career transitions</p>
             <ul className="pricing-features">
               <li>50 AI-tailored CVs</li>
@@ -1421,7 +1827,7 @@ export default function LandingPage() {
               <li>Multiple CV profiles</li>
               <li>Credits never expire</li>
             </ul>
-            <a href="/search" className="pricing-btn pricing-btn-secondary">Buy Pro Pack</a>
+            <a href="/search" className="pricing-btn pricing-btn-secondary">Get Pro Pack</a>
           </div>
         </div>
 
@@ -1432,13 +1838,10 @@ export default function LandingPage() {
           </a>
         </div>
 
-        <div className="revenue-callout" style={{marginTop:'40px'}}>
-          <div className="revenue-callout-title">Market opportunity</div>
-          <p>
-            Estimated market: 200K+ active job seekers in Scandinavia &amp; Poland.
-            At 2% conversion on Growth Pack: ~4,000 purchases × 89 kr =&nbsp;
-            <strong>356,000 kr revenue potential.</strong>
-          </p>
+        <div style={{textAlign:'center',marginTop:'28px',display:'flex',justifyContent:'center',gap:'24px',flexWrap:'wrap',fontSize:'13px',color:'var(--text-faint)'}}>
+          <span>🔒 Secure payment via Stripe</span>
+          <span>🇪🇺 VAT included for EU customers</span>
+          <span>✉️ Instant delivery</span>
         </div>
       </section>
 
@@ -1519,11 +1922,16 @@ export default function LandingPage() {
       {/* CTA BANNER */}
       <section className="cta-section">
         <div className="cta-inner">
-          <h2>Ready to land your next job?</h2>
-          <p>Join thousands of job seekers across Europe already using Resvio.</p>
+          <h2>Start your search today</h2>
+          <p>3 free CVs included. No credit card. No subscription. Just results.</p>
           <a href="/search" className="btn btn-primary btn-lg">
-            Start for free — no credit card required
+            Try Resvio for free →
           </a>
+          <div style={{marginTop:'20px',fontSize:'13px',color:'var(--text-faint)',display:'flex',justifyContent:'center',gap:'20px',flexWrap:'wrap'}}>
+            <span>✓ Free to start</span>
+            <span>✓ 8 European markets</span>
+            <span>✓ Cancel anytime</span>
+          </div>
         </div>
       </section>
 
@@ -1552,7 +1960,7 @@ export default function LandingPage() {
           </div>
 
           <div className="footer-bottom">
-            © 2025 Resvio. Built for Europe&apos;s job seekers.
+            © 2025 Resvio · AI-powered job search for Europe · 🇪🇺 Made in Europe
           </div>
         </div>
       </footer>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ProfileService } from '@/lib/services/profile-service';
+import { SubscriptionService } from '@/lib/services/subscription-service';
 import { CV_TEMPLATES, DEFAULT_TEMPLATE_ID, TemplateId } from '@/lib/cv-templates';
 import { Job } from '@/lib/types';
 
@@ -9,13 +10,24 @@ export async function POST(req: NextRequest) {
       job,
       manualDescription,
       templateId,
-    }: { job: Job; manualDescription?: string; templateId?: TemplateId } = await req.json();
+      targetLanguage,
+    }: { job: Job; manualDescription?: string; templateId?: TemplateId; targetLanguage?: string } = await req.json();
 
     if (!job) {
       return NextResponse.json({ error: 'Job data required' }, { status: 400 });
     }
 
     const profile = ProfileService.getProfile();
+
+    // ── Credit check (subscription gate) ─────────────────────────────────────
+    if (!SubscriptionService.canGenerateCV(profile)) {
+      return NextResponse.json({
+        error: 'no_credits',
+        message: 'You have used all your CV credits. Upgrade your plan to generate more tailored CVs.',
+        creditsRemaining: 0,
+      }, { status: 403 });
+    }
+
     const baseCv = profile?.baseCv || profile?.baseCvPath || '';
 
     if (!baseCv || baseCv.length < 30) {
@@ -33,7 +45,11 @@ export async function POST(req: NextRequest) {
     const cvProfile = baseCv.slice(0, 5000);
     const provider: 'openai' | 'anthropic' = process.env.OPENAI_API_KEY ? 'openai' : 'anthropic';
 
-    const systemPrompt = `You are an expert CV writer for the Scandinavian job market. You produce ATS-optimized, GDPR-compliant, one-page CVs in Markdown. Output ONLY the CV Markdown — no preamble, no explanations.`;
+    const languageInstruction = targetLanguage && targetLanguage !== 'English'
+      ? `IMPORTANT: Write the ENTIRE CV in ${targetLanguage}. All section headers, labels, text, and the GDPR footer must be in ${targetLanguage}.`
+      : 'Write the CV in English unless the job offer is clearly in another language (Swedish/Norwegian/Danish/Polish/German/French), in which case match that language.';
+
+    const systemPrompt = `You are an expert CV writer. You produce ATS-optimized, GDPR-compliant, one-page CVs in Markdown. Output ONLY the CV Markdown — no preamble, no explanations.`;
 
     const userPrompt = `Write a tailored CV using the candidate profile below.
 
@@ -48,7 +64,7 @@ CANDIDATE PROFILE:
 ${cvProfile}
 
 RULES:
-1. LANGUAGE — Detect job offer language (English/Swedish/Polish/Norwegian/Danish) and write entire CV in that language.
+1. LANGUAGE — ${languageInstruction}
 2. ACCURACY — Use ONLY facts from CANDIDATE PROFILE. Never invent, assume, or extrapolate.
 3. PROFESSIONAL TITLE (## line) — Use the candidate's OWN professional title/role from their profile (e.g. "Software Engineer", "UX Designer"). Do NOT use the target job title as the professional title. The target job keywords should appear naturally in the SUMMARY instead.
 4. ATS SUMMARY — First sentence of summary must naturally reference the target role and mirror 2–3 key requirements from the job description (only when truthful about the candidate).
@@ -117,7 +133,11 @@ CONTACT: [Email] | [Phone] | [City, Country] | [LinkedIn if available]
       return NextResponse.json({ error: 'No AI API key configured.' }, { status: 500 });
     }
 
-    return NextResponse.json({ tailoredCv });
+    // Deduct one credit after successful generation
+    SubscriptionService.consumeCredit();
+    const creditsRemaining = SubscriptionService.getRemainingCredits(ProfileService.getProfile());
+
+    return NextResponse.json({ tailoredCv, creditsRemaining });
   } catch (error: any) {
     console.error('Generate CV error:', error);
     return NextResponse.json({ error: error.message || 'Failed to generate CV' }, { status: 500 });

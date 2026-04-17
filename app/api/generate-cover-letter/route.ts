@@ -1,141 +1,84 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ProfileService } from '@/lib/services/profile-service';
-import { Job } from '@/lib/types';
-
-function detectLanguage(text: string): 'pl' | 'en' | 'sv' | 'de' {
-  const t = text.toLowerCase();
-  const pl = (t.match(/\b(praca|stanowisko|wymagania|oferta|umiejętności|doświadczenie|aplikuj|firma)\b/g) || []).length;
-  const sv = (t.match(/\b(arbete|tjänst|ansök|erfarenhet|företag|söker|krav)\b/g) || []).length;
-  const de = (t.match(/\b(stelle|arbeit|erfahrung|kenntnisse|bewerbung|unternehmen|anforderungen)\b/g) || []).length;
-  if (pl >= 2) return 'pl';
-  if (sv >= 2) return 'sv';
-  if (de >= 2) return 'de';
-  return 'en';
-}
-
-const GDPR_NOTES: Record<string, string> = {
-  pl: 'Wyrażam zgodę na przetwarzanie moich danych osobowych zawartych w niniejszym dokumencie dla potrzeb niezbędnych do realizacji procesu rekrutacji zgodnie z Ustawą o ochronie danych osobowych z dnia 10 maja 2018 r. (Dz.U.2018 poz.1000).',
-  en: '',
-  sv: '',
-  de: '',
-};
 
 export async function POST(req: NextRequest) {
   try {
-    const { job, customNote }: { job: Job; customNote?: string } = await req.json();
-    if (!job) return NextResponse.json({ error: 'Job data required' }, { status: 400 });
+    const { job, jobDescription, targetLanguage = 'English' } = await req.json();
 
     const profile = ProfileService.getProfile();
-    if (!profile?.name) {
-      return NextResponse.json({ error: 'Please complete your profile first.' }, { status: 400 });
+    const baseCv = profile?.baseCv || profile?.baseCvPath || '';
+
+    if (!baseCv || baseCv.length < 30) {
+      return NextResponse.json(
+        { error: 'Please add your base CV first in the Profile page.' },
+        { status: 400 }
+      );
     }
 
-    const lang = detectLanguage(
-      (job.title + ' ' + job.description + ' ' + job.company).slice(0, 2000),
-    );
+    const jobTitle  = job?.title   || 'the position';
+    const company   = job?.company || 'your company';
+    const location  = job?.location || '';
+    const desc      = (jobDescription || job?.description || '').slice(0, 2500);
+    const cvExcerpt = baseCv.slice(0, 4000);
 
-    const langInstructions: Record<string, string> = {
-      pl: 'Write the cover letter in Polish (język polski). Use formal "Pan/Pani" style.',
-      en: 'Write the cover letter in English.',
-      sv: 'Write the cover letter in Swedish (svenska).',
-      de: 'Write the cover letter in German (Deutsch). Use formal "Sie" form.',
-    };
+    const languageNote = targetLanguage !== 'English'
+      ? `Write the ENTIRE letter in ${targetLanguage}.`
+      : 'Write in English unless the job is clearly in Swedish/Norwegian/Danish/Polish/German/French — then match that language.';
 
-    const profileSummary = [
-      profile.baseCv || '',
-      profile.skills?.length ? `Skills: ${profile.skills.join(', ')}` : '',
-    ]
-      .filter(Boolean)
-      .join('\n\n')
-      .slice(0, 3000);
+    const systemPrompt = `You are an expert career coach. Write professional, compelling cover letters. Output ONLY the cover letter text — no subject line, no preamble.`;
 
-    const prompt = `You are an expert at writing compelling cover letters tailored to specific job offers.
+    const userPrompt = `Write a professional cover letter for this application.
 
-${langInstructions[lang]}
+POSITION: ${jobTitle} at ${company}${location ? ` — ${location}` : ''}
+JOB DESCRIPTION:
+${desc || 'Not provided — write a strong general cover letter based on the candidate profile.'}
 
 CANDIDATE PROFILE:
-Name: ${profile.name}
-Email: ${profile.email || ''}
-Phone: ${profile.phone || ''}
-${profileSummary}
+${cvExcerpt}
 
-JOB OFFER:
-Title: ${job.title}
-Company: ${job.company}
-Location: ${job.location}
-Description:
-${job.description?.slice(0, 2000) || 'No description provided.'}
+LANGUAGE: ${languageNote}
 
-${customNote ? `Additional note from candidate: ${customNote}` : ''}
+RULES:
+1. Open with a strong hook — NOT "I am writing to apply for...".
+2. Three paragraphs: (a) Why this company/role, (b) Top 2-3 achievements with impact, (c) Forward-looking close with call to action.
+3. Professional but warm tone. Max 350 words. No bullets — flowing prose.
+4. Sign off with the candidate's name from the profile.
+5. Start with salutation "Dear ${company} Team," or similar. Go straight into letter — no address block.`;
 
-Write a professional, engaging cover letter (3–4 paragraphs) that:
-1. Opens with a strong hook connecting the candidate to the specific company and role
-2. Highlights 2–3 most relevant skills/experiences matching the job requirements
-3. Shows genuine enthusiasm and cultural fit for the company
-4. Closes with a confident call to action
-
-Format: Plain text, no headers, no "Dear Hiring Manager" boilerplate — use the company name specifically.
-Do NOT add any greetings/signatures — just the body paragraphs.
-${GDPR_NOTES[lang] ? `\nEnd with this GDPR note on a new line:\n${GDPR_NOTES[lang]}` : ''}`;
-
-    // Try Anthropic first, then OpenAI
-    if (process.env.ANTHROPIC_API_KEY) {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 1024,
-          messages: [{ role: 'user', content: prompt }],
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        const text = data.content?.[0]?.text || '';
-        if (text) {
-          return NextResponse.json({
-            coverLetter: text.trim(),
-            language: lang,
-          });
-        }
-      }
-    }
+    let letter = '';
 
     if (process.env.OPENAI_API_KEY) {
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          max_tokens: 1024,
-          messages: [{ role: 'user', content: prompt }],
-        }),
+      const { default: OpenAI } = await import('openai');
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const res = await openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user',   content: userPrompt },
+        ],
+        max_tokens: 900,
+        temperature: 0.5,
       });
-      if (res.ok) {
-        const data = await res.json();
-        const text = data.choices?.[0]?.message?.content || '';
-        if (text) {
-          return NextResponse.json({
-            coverLetter: text.trim(),
-            language: lang,
-          });
-        }
-      }
+      letter = res.choices[0].message.content || '';
+    } else if (process.env.ANTHROPIC_API_KEY) {
+      const { default: Anthropic } = await import('@anthropic-ai/sdk');
+      const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+      const res = await anthropic.messages.create({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 900,
+        temperature: 0.5,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }],
+      });
+      // @ts-ignore
+      letter = res.content[0].text || '';
+    } else {
+      return NextResponse.json({ error: 'No AI API key configured.' }, { status: 500 });
     }
 
-    return NextResponse.json(
-      { error: 'No AI API key configured. Add ANTHROPIC_API_KEY or OPENAI_API_KEY.' },
-      { status: 503 },
-    );
-  } catch (err) {
-    console.error('Cover letter generation error:', err);
-    return NextResponse.json({ error: 'Generation failed.' }, { status: 500 });
+    return NextResponse.json({ letter, jobTitle, company });
+  } catch (err: any) {
+    console.error('[generate-cover-letter]', err);
+    return NextResponse.json({ error: err.message || 'Failed to generate cover letter' }, { status: 500 });
   }
 }
